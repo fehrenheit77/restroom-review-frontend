@@ -827,7 +827,7 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
   );
 };
 
-// Upload Form Component
+// FIXED Upload Form Component
 const UploadForm = ({ onSuccess }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
@@ -846,6 +846,7 @@ const UploadForm = ({ onSuccess }) => {
   const [showLocationSelector, setShowLocationSelector] = useState(false);
   const [showMobileCamera, setShowMobileCamera] = useState(false);
   const [isNative, setIsNative] = useState(false);
+  const [debugInfo, setDebugInfo] = useState(''); // Debug state
 
   useEffect(() => {
     const checkDevice = async () => {
@@ -893,18 +894,41 @@ const UploadForm = ({ onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.image || 
-        formData.sinkRating === 0 || 
-        formData.floorRating === 0 || 
-        formData.toiletRating === 0 || 
-        formData.smellRating === 0 || 
-        formData.nicenessRating === 0 || 
-        !formData.location.trim()) {
-      alert('Please fill in all required fields and rate all categories');
+    console.log('🔍 Form submission started');
+    console.log('📋 Current form data:', {
+      hasImage: !!formData.image,
+      sinkRating: formData.sinkRating,
+      floorRating: formData.floorRating,
+      toiletRating: formData.toiletRating,
+      smellRating: formData.smellRating,
+      nicenessRating: formData.nicenessRating,
+      location: formData.location,
+      comments: formData.comments,
+      coordinates: formData.coordinates
+    });
+
+    // Enhanced validation with specific error messages
+    const missingFields = [];
+    
+    if (!formData.image) missingFields.push('Photo');
+    if (formData.sinkRating === 0) missingFields.push('Sink rating');
+    if (formData.floorRating === 0) missingFields.push('Floor rating');
+    if (formData.toiletRating === 0) missingFields.push('Toilet rating');
+    if (formData.smellRating === 0) missingFields.push('Smell rating');
+    if (formData.nicenessRating === 0) missingFields.push('Niceness rating');
+    if (!formData.location.trim()) missingFields.push('Location');
+
+    if (missingFields.length > 0) {
+      const errorMsg = `Please fill in these required fields: ${missingFields.join(', ')}`;
+      alert(errorMsg);
+      console.log('❌ Validation failed:', errorMsg);
+      setDebugInfo(`Validation failed: ${missingFields.join(', ')}`);
       return;
     }
 
     setUploading(true);
+    setDebugInfo('Submitting review...');
+    console.log('✅ Validation passed, submitting...');
 
     try {
       const submitData = new FormData();
@@ -922,15 +946,23 @@ const UploadForm = ({ onSuccess }) => {
         submitData.append('longitude', formData.coordinates.lng);
       }
 
+      console.log('📤 Sending POST request to:', `${API}/bathrooms`);
+      
       const response = await axios.post(`${API}/bathrooms`, submitData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      // Check if response indicates success
-      if (response.data.success) {
-        setFormData({
+      console.log('📨 Server response:', response.data);
+      setDebugInfo(`Server response: ${JSON.stringify(response.data)}`);
+
+      // Check for success response
+      if (response.data && (response.data.success || response.data.id)) {
+        console.log('✅ Upload successful!');
+        
+        // Reset form
+        const newFormData = {
           image: null,
           sinkRating: 0,
           floorRating: 0,
@@ -940,18 +972,26 @@ const UploadForm = ({ onSuccess }) => {
           location: '',
           coordinates: null,
           comments: ''
-        });
+        };
+        
+        setFormData(newFormData);
         setPreviewUrl(null);
         setShowLocationSelector(false);
+        setDebugInfo('Upload successful! Form reset.');
         
-        onSuccess(response.data.bathroom);
-        alert('Loo review uploaded successfully!');
+        // Call success callback
+        const bathroomData = response.data.bathroom || response.data;
+        onSuccess(bathroomData);
+        
+        alert('🎉 Loo review uploaded successfully!');
       } else {
-        throw new Error('Upload failed');
+        throw new Error('Server did not confirm successful upload');
       }
     } catch (error) {
-      console.error('Upload failed:', error);
-      alert('Failed to upload loo review. Please try again.');
+      console.error('❌ Upload failed:', error);
+      const errorMsg = error.response?.data?.detail || error.message || 'Upload failed';
+      setDebugInfo(`Upload failed: ${errorMsg}`);
+      alert(`Failed to upload loo review: ${errorMsg}`);
     } finally {
       setUploading(false);
     }
@@ -968,10 +1008,17 @@ const UploadForm = ({ onSuccess }) => {
         )}
       </div>
       
+      {/* Debug info */}
+      {debugInfo && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+          Debug: {debugInfo}
+        </div>
+      )}
+      
       {/* Image Upload */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Upload Photo *
+          Upload Photo * {!formData.image && <span className="text-red-500">(Required)</span>}
         </label>
         
         {isNative ? (
@@ -992,7 +1039,6 @@ const UploadForm = ({ onSuccess }) => {
             type="file"
             accept="image/*"
             onChange={handleImageChange}
-            required
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
         )}
@@ -1068,7 +1114,7 @@ const UploadForm = ({ onSuccess }) => {
       {/* Location with Autocomplete */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Location * 
+          Location * {!formData.location && <span className="text-red-500">(Required)</span>}
           <span className="text-xs text-gray-500 ml-2">(Search for businesses, addresses, landmarks)</span>
         </label>
         <LocationAutocomplete
@@ -1143,7 +1189,7 @@ const UploadForm = ({ onSuccess }) => {
         disabled={uploading}
         className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
       >
-        {uploading ? 'Uploading...' : 'Submit Rating'}
+        {uploading ? 'Uploading Review...' : 'Submit Rating'}
       </button>
       
       {/* Mobile Camera Modal */}
@@ -1369,6 +1415,7 @@ function MainApp() {
   }, []);
 
   const handleUploadSuccess = (newBathroom) => {
+    console.log('🎉 Upload success callback triggered', newBathroom);
     setBathrooms([newBathroom, ...bathrooms]);
     setView('gallery');
   };
