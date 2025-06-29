@@ -106,7 +106,7 @@ const Login = () => {
 
     try {
       const endpoint = isRegister ? '/auth/register' : '/auth/login';
-      const payload = isRegister
+      const payload = isRegister 
         ? { email: formData.email, password: formData.password, full_name: formData.full_name }
         : { email: formData.email, password: formData.password };
 
@@ -277,8 +277,8 @@ const Login = () => {
               }}
               className="text-blue-600 hover:text-blue-500 text-sm"
             >
-              {isRegister
-                ? 'Already have an account? Sign in'
+              {isRegister 
+                ? 'Already have an account? Sign in' 
                 : "Don't have an account? Sign up"}
             </button>
           </div>
@@ -315,15 +315,15 @@ const CategoryRating = ({ category, rating, onRatingChange, icon }) => {
 };
 
 // Overall Rating Display Component
-const OverallRating = ({
-  sinkRating,
-  floorRating,
-  toiletRating,
-  smellRating,
-  nicenessRating,
+const OverallRating = ({ 
+  sinkRating, 
+  floorRating, 
+  toiletRating, 
+  smellRating, 
+  nicenessRating, 
   overallRating,
   showBreakdown = false,
-  readonly = true
+  readonly = true 
 }) => {
   const categories = [
     { name: 'sink', rating: sinkRating, icon: '🚰' },
@@ -626,6 +626,7 @@ const MobileCamera = ({ onImageCapture, onClose }) => {
     </div>
   );
 };
+
 // Mobile Geolocation Component
 const MobileGeolocation = ({ onLocationFound, onError }) => {
   const [loading, setLoading] = useState(false);
@@ -703,7 +704,7 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
               lng: place.geometry.location.lng()
             };
             
-            const locationText = place.name && place.formatted_address
+            const locationText = place.name && place.formatted_address 
               ? `${place.name}, ${place.formatted_address}`
               : place.formatted_address || place.name || value;
             
@@ -737,6 +738,7 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
     />
   );
 };
+
 // Location Selector Component (Manual Map Selection)
 const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
   const [map, setMap] = useState(null);
@@ -850,8 +852,8 @@ const UploadForm = ({ onSuccess }) => {
   };
 
   const handleLocationFound = (location) => {
-    setFormData({
-      ...formData,
+    setFormData({ 
+      ...formData, 
       coordinates: location,
       location: formData.location || `Location: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`
     });
@@ -868,12 +870,12 @@ const UploadForm = ({ onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.image ||
-        formData.sinkRating === 0 ||
-        formData.floorRating === 0 ||
-        formData.toiletRating === 0 ||
-        formData.smellRating === 0 ||
-        formData.nicenessRating === 0 ||
+    if (!formData.image || 
+        formData.sinkRating === 0 || 
+        formData.floorRating === 0 || 
+        formData.toiletRating === 0 || 
+        formData.smellRating === 0 || 
+        formData.nicenessRating === 0 || 
         !formData.location.trim()) {
       alert('Please fill in all required fields and rate all categories');
       return;
@@ -903,24 +905,27 @@ const UploadForm = ({ onSuccess }) => {
         },
       });
 
-      setFormData({
-        image: null,
-        sinkRating: 0,
-        floorRating: 0,
-        toiletRating: 0,
-        smellRating: 0,
-        nicenessRating: 0,
-        location: '',
-        coordinates: null,
-        comments: ''
-      });
-      setPreviewUrl(null);
-      setShowLocationSelector(false);
-      
-      e.target.reset();
-      
-      onSuccess(response.data);
-      alert('Loo review uploaded successfully!');
+      // Check if response indicates success
+      if (response.data.success) {
+        setFormData({
+          image: null,
+          sinkRating: 0,
+          floorRating: 0,
+          toiletRating: 0,
+          smellRating: 0,
+          nicenessRating: 0,
+          location: '',
+          coordinates: null,
+          comments: ''
+        });
+        setPreviewUrl(null);
+        setShowLocationSelector(false);
+        
+        onSuccess(response.data.bathroom);
+        alert('Loo review uploaded successfully!');
+      } else {
+        throw new Error('Upload failed');
+      }
     } catch (error) {
       console.error('Upload failed:', error);
       alert('Failed to upload loo review. Please try again.');
@@ -971,9 +976,9 @@ const UploadForm = ({ onSuccess }) => {
         
         {previewUrl && (
           <div className="mt-4">
-            <img
-              src={previewUrl}
-              alt="Preview"
+            <img 
+              src={previewUrl} 
+              alt="Preview" 
               className="max-w-full h-48 object-cover rounded-lg"
             />
           </div>
@@ -983,7 +988,7 @@ const UploadForm = ({ onSuccess }) => {
       {/* Categorical Ratings */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-4">
-          Rate Each Category *
+          Rate Each Category * 
           <span className="text-xs text-gray-500 ml-2">(All categories required)</span>
         </label>
         <div className="space-y-3">
@@ -1020,7 +1025,7 @@ const UploadForm = ({ onSuccess }) => {
         </div>
         
         {/* Overall Rating Preview */}
-        {(formData.sinkRating > 0 || formData.floorRating > 0 || formData.toiletRating > 0 ||
+        {(formData.sinkRating > 0 || formData.floorRating > 0 || formData.toiletRating > 0 || 
           formData.smellRating > 0 || formData.nicenessRating > 0) && (
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
             <OverallRating
@@ -1029,7 +1034,7 @@ const UploadForm = ({ onSuccess }) => {
               toiletRating={formData.toiletRating}
               smellRating={formData.smellRating}
               nicenessRating={formData.nicenessRating}
-              overallRating={(formData.sinkRating + formData.floorRating + formData.toiletRating +
+              overallRating={(formData.sinkRating + formData.floorRating + formData.toiletRating + 
                 formData.smellRating + formData.nicenessRating) / 5}
               showBreakdown={true}
             />
@@ -1040,7 +1045,7 @@ const UploadForm = ({ onSuccess }) => {
       {/* Location with Autocomplete */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Location *
+          Location * 
           <span className="text-xs text-gray-500 ml-2">(Search for businesses, addresses, landmarks)</span>
         </label>
         <LocationAutocomplete
@@ -1058,7 +1063,7 @@ const UploadForm = ({ onSuccess }) => {
         {/* Mobile Geolocation */}
         {isNative && (
           <div className="mt-3">
-            <MobileGeolocation
+            <MobileGeolocation 
               onLocationFound={handleLocationFound}
               onError={handleLocationError}
             />
@@ -1084,7 +1089,7 @@ const UploadForm = ({ onSuccess }) => {
           Use this if you want to manually click on the map to select coordinates
         </p>
         {showLocationSelector && (
-          <LocationSelector
+          <LocationSelector 
             onLocationSelect={(coordinates) => setFormData({ ...formData, coordinates })}
             selectedLocation={formData.coordinates}
           />
@@ -1130,7 +1135,7 @@ const UploadForm = ({ onSuccess }) => {
 };
 
 // Bathroom Card Component
-const BathroomCard = ({ bathroom, onClick }) => {
+const BathroomCard = ({ bathroom, onClick, onDelete, currentUserId }) => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -1141,11 +1146,33 @@ const BathroomCard = ({ bathroom, onClick }) => {
     });
   };
 
+  const handleDelete = async (e) => {
+    e.stopPropagation(); // Prevent card click
+    if (window.confirm('Are you sure you want to delete this review?')) {
+      try {
+        await onDelete(bathroom.id);
+      } catch (error) {
+        alert('Failed to delete review. Please try again.');
+      }
+    }
+  };
+
   return (
-    <div
-      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+    <div 
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow relative"
       onClick={() => onClick && onClick(bathroom)}
     >
+      {/* Delete button for user's own reviews */}
+      {currentUserId === bathroom.user_id && (
+        <button
+          onClick={handleDelete}
+          className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700 z-10"
+          title="Delete review"
+        >
+          ×
+        </button>
+      )}
+      
       <img
         src={`${BACKEND_URL}${bathroom.image_url}`}
         alt="Loo"
@@ -1283,7 +1310,7 @@ const BathroomModal = ({ bathroom, isOpen, onClose }) => {
   );
 };
 
-// Main App Component
+// Main App Component  
 function App() {
   return (
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
@@ -1326,6 +1353,17 @@ function MainApp() {
   const handleMarkerClick = (bathroom) => {
     setSelectedBathroom(bathroom);
     setShowModal(true);
+  };
+
+  const handleDeleteReview = async (bathroomId) => {
+    try {
+      await axios.delete(`${API}/bathrooms/${bathroomId}`);
+      setBathrooms(bathrooms.filter(b => b.id !== bathroomId));
+      alert('Review deleted successfully!');
+    } catch (error) {
+      console.error('Failed to delete review:', error);
+      throw error;
+    }
   };
 
   const bathroomsWithCoordinates = bathrooms.filter(b => b.latitude && b.longitude);
@@ -1436,13 +1474,15 @@ function MainApp() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {bathrooms.map((bathroom) => (
-                  <BathroomCard
-                    key={bathroom.id}
-                    bathroom={bathroom}
+                  <BathroomCard 
+                    key={bathroom.id} 
+                    bathroom={bathroom} 
+                    currentUserId={user.id}
                     onClick={(bathroom) => {
                       setSelectedBathroom(bathroom);
                       setShowModal(true);
                     }}
+                    onDelete={handleDeleteReview}
                   />
                 ))}
               </div>
@@ -1500,5 +1540,3 @@ function MainApp() {
 }
 
 export default App;
-
-
