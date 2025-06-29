@@ -675,10 +675,9 @@ const MobileGeolocation = ({ onLocationFound, onError }) => {
   );
 };
 
-// FIXED LocationAutocomplete Component - Now Properly Persists Selection
+// FIXED LocationAutocomplete Component - Now Properly Persists Both Text and Coordinates
 const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onChange }) => {
   const [autocomplete, setAutocomplete] = useState(null);
-  const [isLocationLocked, setIsLocationLocked] = useState(false);
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -710,21 +709,17 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
             
             const locationText = place.name && place.formatted_address 
               ? `${place.name}, ${place.formatted_address}`
-              : place.formatted_address || place.name || value;
+              : place.formatted_address || place.name || '';
             
             console.log('📍 Setting location:', locationText, location);
             
-            // Lock the location to prevent it from being overwritten
-            setIsLocationLocked(true);
-            
-            // Update both location text and coordinates
-            onChange(locationText);
-            if (onLocationSelect) {
-              onLocationSelect(location);
+            // CRITICAL FIX: Set both location text AND coordinates at the same time
+            if (locationText.trim()) {
+              onChange(locationText);
+              if (onLocationSelect) {
+                onLocationSelect(location);
+              }
             }
-            
-            // Clear the lock after a short delay to allow for future edits
-            setTimeout(() => setIsLocationLocked(false), 1000);
           }
         });
 
@@ -737,15 +732,15 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
     if (inputRef.current && !autocomplete) {
       initAutocomplete();
     }
-  }, [onLocationSelect, onChange, value, autocomplete]);
+  }, [onLocationSelect, onChange, autocomplete]);
 
   const handleInputChange = (e) => {
-    // Only allow changes if location is not locked
-    if (!isLocationLocked) {
-      onChange(e.target.value);
-      
-      // Clear coordinates if user manually edits the location
-      if (selectedLocation && onLocationSelect) {
+    const newValue = e.target.value;
+    onChange(newValue);
+    
+    // If user manually clears or edits significantly, clear coordinates
+    if (!newValue.trim() || (selectedLocation && newValue.length < value.length * 0.5)) {
+      if (onLocationSelect) {
         onLocationSelect(null);
       }
     }
@@ -767,19 +762,18 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
         }`}
       />
       
-      {selectedLocation && (
+      {selectedLocation && value.trim() && (
         <div className="absolute right-2 top-2 text-green-600">
           <span title="Location coordinates found">📍</span>
         </div>
       )}
       
-      {selectedLocation && (
+      {value.trim() && (
         <button
           type="button"
           onClick={() => {
             onChange('');
             onLocationSelect(null);
-            setIsLocationLocked(false);
           }}
           className="absolute right-8 top-2 text-gray-400 hover:text-gray-600"
           title="Clear location"
@@ -791,7 +785,7 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
   );
 };
 
-// FIXED Location Selector Component (Manual Map Selection)
+// Location Selector Component (Manual Map Selection)
 const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
   const [map, setMap] = useState(null);
   const [marker, setMarker] = useState(null);
@@ -853,9 +847,8 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
       
       const newCenter = { lat: selectedLocation.lat, lng: selectedLocation.lng };
       map.setCenter(newCenter);
-      map.setZoom(15); // Zoom in closer to the selected location
+      map.setZoom(15);
       
-      // Update or create marker
       if (marker) {
         marker.setMap(null);
       }
@@ -911,7 +904,6 @@ const UploadForm = ({ onSuccess }) => {
   const [showLocationSelector, setShowLocationSelector] = useState(false);
   const [showMobileCamera, setShowMobileCamera] = useState(false);
   const [isNative, setIsNative] = useState(false);
-  const [debugInfo, setDebugInfo] = useState('');
 
   useEffect(() => {
     const checkDevice = async () => {
@@ -975,6 +967,8 @@ const UploadForm = ({ onSuccess }) => {
       smellRating: formData.smellRating,
       nicenessRating: formData.nicenessRating,
       location: formData.location,
+      locationLength: formData.location.length,
+      locationTrimmed: formData.location.trim(),
       comments: formData.comments,
       coordinates: formData.coordinates
     });
@@ -988,18 +982,16 @@ const UploadForm = ({ onSuccess }) => {
     if (formData.toiletRating === 0) missingFields.push('Toilet rating');
     if (formData.smellRating === 0) missingFields.push('Smell rating');
     if (formData.nicenessRating === 0) missingFields.push('Niceness rating');
-    if (!formData.location.trim()) missingFields.push('Location');
+    if (!formData.location || !formData.location.trim()) missingFields.push('Location');
 
     if (missingFields.length > 0) {
       const errorMsg = `Please fill in these required fields: ${missingFields.join(', ')}`;
       alert(errorMsg);
       console.log('❌ Validation failed:', errorMsg);
-      setDebugInfo(`Validation failed: ${missingFields.join(', ')}`);
       return;
     }
 
     setUploading(true);
-    setDebugInfo('Submitting review...');
     console.log('✅ Validation passed, submitting...');
 
     try {
@@ -1010,7 +1002,7 @@ const UploadForm = ({ onSuccess }) => {
       submitData.append('toilet_rating', formData.toiletRating);
       submitData.append('smell_rating', formData.smellRating);
       submitData.append('niceness_rating', formData.nicenessRating);
-      submitData.append('location', formData.location);
+      submitData.append('location', formData.location.trim());
       submitData.append('comments', formData.comments);
       
       if (formData.coordinates) {
@@ -1027,7 +1019,6 @@ const UploadForm = ({ onSuccess }) => {
       });
 
       console.log('📨 Server response:', response.data);
-      setDebugInfo(`Server response: ${JSON.stringify(response.data)}`);
 
       // Check for success response
       if (response.data && (response.data.success || response.data.id)) {
@@ -1049,7 +1040,6 @@ const UploadForm = ({ onSuccess }) => {
         setFormData(newFormData);
         setPreviewUrl(null);
         setShowLocationSelector(false);
-        setDebugInfo('Upload successful! Form reset.');
         
         // Call success callback
         const bathroomData = response.data.bathroom || response.data;
@@ -1062,7 +1052,6 @@ const UploadForm = ({ onSuccess }) => {
     } catch (error) {
       console.error('❌ Upload failed:', error);
       const errorMsg = error.response?.data?.detail || error.message || 'Upload failed';
-      setDebugInfo(`Upload failed: ${errorMsg}`);
       alert(`Failed to upload loo review: ${errorMsg}`);
     } finally {
       setUploading(false);
@@ -1080,17 +1069,10 @@ const UploadForm = ({ onSuccess }) => {
         )}
       </div>
       
-      {/* Debug info */}
-      {debugInfo && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-          Debug: {debugInfo}
-        </div>
-      )}
-      
       {/* Image Upload */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Upload Photo * {!formData.image && <span className="text-red-500">(Required)</span>}
+          Upload Photo *
         </label>
         
         {isNative ? (
@@ -1186,7 +1168,7 @@ const UploadForm = ({ onSuccess }) => {
       {/* Location with Autocomplete */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Location * {!formData.location && <span className="text-red-500">(Required)</span>}
+          Location *
           <span className="text-xs text-gray-500 ml-2">(Search for businesses, addresses, landmarks)</span>
         </label>
         <LocationAutocomplete
@@ -1195,7 +1177,7 @@ const UploadForm = ({ onSuccess }) => {
           onLocationSelect={handleLocationSelect}
           selectedLocation={formData.coordinates}
         />
-        {formData.coordinates && (
+        {formData.coordinates && formData.location.trim() && (
           <div className="mt-2 text-sm text-green-600 bg-green-50 p-2 rounded">
             ✓ Location found with coordinates: {formData.coordinates.lat.toFixed(6)}, {formData.coordinates.lng.toFixed(6)}
           </div>
