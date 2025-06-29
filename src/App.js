@@ -675,6 +675,7 @@ const MobileGeolocation = ({ onLocationFound, onError }) => {
   );
 };
 
+// FIXED LocationAutocomplete Component
 const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onChange }) => {
   const [autocomplete, setAutocomplete] = useState(null);
   const inputRef = useRef(null);
@@ -739,7 +740,7 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
   );
 };
 
-// Location Selector Component (Manual Map Selection)
+// FIXED Location Selector Component (Manual Map Selection)
 const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
   const [map, setMap] = useState(null);
   const [marker, setMarker] = useState(null);
@@ -791,6 +792,28 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
 
     initMap();
   }, [onLocationSelect]);
+
+  // FIXED: Update map center when selectedLocation changes from autocomplete
+  useEffect(() => {
+    if (map && selectedLocation) {
+      const newCenter = { lat: selectedLocation.lat, lng: selectedLocation.lng };
+      map.setCenter(newCenter);
+      map.setZoom(15); // Zoom in closer to the selected location
+      
+      // Update or create marker
+      if (marker) {
+        marker.setMap(null);
+      }
+      
+      const newMarker = new window.google.maps.Marker({
+        position: newCenter,
+        map: map,
+        title: 'Selected Location'
+      });
+      
+      setMarker(newMarker);
+    }
+  }, [map, selectedLocation]);
 
   return (
     <div className="w-full h-64 border rounded-lg overflow-hidden">
