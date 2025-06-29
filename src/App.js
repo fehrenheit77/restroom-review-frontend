@@ -675,9 +675,10 @@ const MobileGeolocation = ({ onLocationFound, onError }) => {
   );
 };
 
-// FIXED LocationAutocomplete Component
+// FIXED LocationAutocomplete Component - Now Properly Persists Selection
 const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onChange }) => {
   const [autocomplete, setAutocomplete] = useState(null);
+  const [isLocationLocked, setIsLocationLocked] = useState(false);
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -699,6 +700,8 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
         autocompleteInstance.addListener('place_changed', () => {
           const place = autocompleteInstance.getPlace();
           
+          console.log('🗺️ Place selected:', place);
+          
           if (place.geometry && place.geometry.location) {
             const location = {
               lat: place.geometry.location.lat(),
@@ -709,10 +712,19 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
               ? `${place.name}, ${place.formatted_address}`
               : place.formatted_address || place.name || value;
             
+            console.log('📍 Setting location:', locationText, location);
+            
+            // Lock the location to prevent it from being overwritten
+            setIsLocationLocked(true);
+            
+            // Update both location text and coordinates
             onChange(locationText);
             if (onLocationSelect) {
               onLocationSelect(location);
             }
+            
+            // Clear the lock after a short delay to allow for future edits
+            setTimeout(() => setIsLocationLocked(false), 1000);
           }
         });
 
@@ -727,16 +739,55 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
     }
   }, [onLocationSelect, onChange, value, autocomplete]);
 
+  const handleInputChange = (e) => {
+    // Only allow changes if location is not locked
+    if (!isLocationLocked) {
+      onChange(e.target.value);
+      
+      // Clear coordinates if user manually edits the location
+      if (selectedLocation && onLocationSelect) {
+        onLocationSelect(null);
+      }
+    }
+  };
+
   return (
-    <input
-      ref={inputRef}
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder="Search for a place... (e.g., Starbucks, McDonald's, Mall)"
-      required
-      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
+    <div className="relative">
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        onChange={handleInputChange}
+        placeholder="Search for a place... (e.g., Starbucks, McDonald's, Mall)"
+        required
+        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          selectedLocation 
+            ? 'border-green-300 bg-green-50' 
+            : 'border-gray-300'
+        }`}
+      />
+      
+      {selectedLocation && (
+        <div className="absolute right-2 top-2 text-green-600">
+          <span title="Location coordinates found">📍</span>
+        </div>
+      )}
+      
+      {selectedLocation && (
+        <button
+          type="button"
+          onClick={() => {
+            onChange('');
+            onLocationSelect(null);
+            setIsLocationLocked(false);
+          }}
+          className="absolute right-8 top-2 text-gray-400 hover:text-gray-600"
+          title="Clear location"
+        >
+          ×
+        </button>
+      )}
+    </div>
   );
 };
 
@@ -767,6 +818,8 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
             lng: event.latLng.lng()
           };
           
+          console.log('🗺️ Map clicked:', location);
+          
           if (onLocationSelect) {
             onLocationSelect(location);
           }
@@ -793,9 +846,11 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
     initMap();
   }, [onLocationSelect]);
 
-  // FIXED: Update map center when selectedLocation changes from autocomplete
+  // Update map center when selectedLocation changes from autocomplete
   useEffect(() => {
     if (map && selectedLocation) {
+      console.log('🗺️ Updating map center to:', selectedLocation);
+      
       const newCenter = { lat: selectedLocation.lat, lng: selectedLocation.lng };
       map.setCenter(newCenter);
       map.setZoom(15); // Zoom in closer to the selected location
@@ -808,7 +863,17 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
       const newMarker = new window.google.maps.Marker({
         position: newCenter,
         map: map,
-        title: 'Selected Location'
+        title: 'Selected Location',
+        icon: {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12.5 2C8.5 2 5.5 5 5.5 9c0 6 7 12 7 12s7-6 7-12c0-4-3-7-7-7z" fill="#FF4444"/>
+              <circle cx="12.5" cy="9" r="3" fill="white"/>
+            </svg>
+          `),
+          scaledSize: new window.google.maps.Size(25, 25),
+          anchor: new window.google.maps.Point(12.5, 25)
+        }
       });
       
       setMarker(newMarker);
@@ -827,7 +892,7 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
   );
 };
 
-// FIXED Upload Form Component
+// Upload Form Component
 const UploadForm = ({ onSuccess }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
@@ -846,7 +911,7 @@ const UploadForm = ({ onSuccess }) => {
   const [showLocationSelector, setShowLocationSelector] = useState(false);
   const [showMobileCamera, setShowMobileCamera] = useState(false);
   const [isNative, setIsNative] = useState(false);
-  const [debugInfo, setDebugInfo] = useState(''); // Debug state
+  const [debugInfo, setDebugInfo] = useState('');
 
   useEffect(() => {
     const checkDevice = async () => {
@@ -876,6 +941,7 @@ const UploadForm = ({ onSuccess }) => {
   };
 
   const handleLocationFound = (location) => {
+    console.log('📍 Location found via geolocation:', location);
     setFormData({ 
       ...formData, 
       coordinates: location,
@@ -888,7 +954,13 @@ const UploadForm = ({ onSuccess }) => {
   };
 
   const handleLocationSelect = (coordinates) => {
+    console.log('📍 Location selected:', coordinates);
     setFormData({ ...formData, coordinates });
+  };
+
+  const handleLocationChange = (locationText) => {
+    console.log('📝 Location text changed:', locationText);
+    setFormData({ ...formData, location: locationText });
   };
 
   const handleSubmit = async (e) => {
@@ -1119,8 +1191,8 @@ const UploadForm = ({ onSuccess }) => {
         </label>
         <LocationAutocomplete
           value={formData.location}
-          onChange={(location) => setFormData({ ...formData, location })}
-          onLocationSelect={(coordinates) => setFormData({ ...formData, coordinates })}
+          onChange={handleLocationChange}
+          onLocationSelect={handleLocationSelect}
           selectedLocation={formData.coordinates}
         />
         {formData.coordinates && (
@@ -1159,7 +1231,7 @@ const UploadForm = ({ onSuccess }) => {
         </p>
         {showLocationSelector && (
           <LocationSelector 
-            onLocationSelect={(coordinates) => setFormData({ ...formData, coordinates })}
+            onLocationSelect={handleLocationSelect}
             selectedLocation={formData.coordinates}
           />
         )}
