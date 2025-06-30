@@ -626,6 +626,7 @@ const MobileCamera = ({ onImageCapture, onClose }) => {
     </div>
   );
 };
+
 // Mobile Geolocation Component
 const MobileGeolocation = ({ onLocationFound, onError }) => {
   const [loading, setLoading] = useState(false);
@@ -758,6 +759,7 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
     />
   );
 };
+
 // Location Selector Component (Manual Map Selection)
 const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
   const [map, setMap] = useState(null);
@@ -858,7 +860,7 @@ const UploadForm = ({ onSuccess }) => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData({ ...formData, image: file });
+      setFormData(prev => ({ ...prev, image: file }));
       
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
@@ -866,16 +868,16 @@ const UploadForm = ({ onSuccess }) => {
   };
 
   const handleMobileImageCapture = (file, dataUrl) => {
-    setFormData({ ...formData, image: file });
+    setFormData(prev => ({ ...prev, image: file }));
     setPreviewUrl(dataUrl);
   };
 
   const handleLocationFound = (location) => {
-    setFormData({ 
-      ...formData, 
+    setFormData(prev => ({ 
+      ...prev, 
       coordinates: location,
-      location: formData.location || `Location: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`
-    });
+      location: prev.location || `Location: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`
+    }));
   };
 
   const handleLocationError = (error) => {
@@ -883,7 +885,7 @@ const UploadForm = ({ onSuccess }) => {
   };
 
   const handleLocationSelect = (coordinates) => {
-    setFormData({ ...formData, coordinates });
+    setFormData(prev => ({ ...prev, coordinates }));
   };
 
   const handleSubmit = async (e) => {
@@ -891,39 +893,44 @@ const UploadForm = ({ onSuccess }) => {
     
     // Debug logging
     console.log('Form submission attempt:', {
+      hasImage: !!formData.image,
+      imageType: formData.image?.type,
+      imageSize: formData.image?.size,
       location: formData.location,
       locationLength: formData.location?.length,
       locationTrimmed: formData.location?.trim(),
       coordinates: formData.coordinates,
-      hasImage: !!formData.image,
       ratings: {
         sink: formData.sinkRating,
         floor: formData.floorRating,
         toilet: formData.toiletRating,
         smell: formData.smellRating,
         niceness: formData.nicenessRating
-      }
+      },
+      comments: formData.comments
     });
     
-    if (!formData.image || 
-        formData.sinkRating === 0 || 
-        formData.floorRating === 0 || 
-        formData.toiletRating === 0 || 
-        formData.smellRating === 0 || 
-        formData.nicenessRating === 0 || 
-        !formData.location.trim()) {
-      
-      const missingFields = [];
-      if (!formData.image) missingFields.push('Image');
-      if (formData.sinkRating === 0) missingFields.push('Sink rating');
-      if (formData.floorRating === 0) missingFields.push('Floor rating');
-      if (formData.toiletRating === 0) missingFields.push('Toilet rating');
-      if (formData.smellRating === 0) missingFields.push('Smell rating');
-      if (formData.nicenessRating === 0) missingFields.push('Niceness rating');
-      if (!formData.location.trim()) missingFields.push('Location');
-      
+    // Validation with better error messages
+    const missingFields = [];
+    if (!formData.image) missingFields.push('Image');
+    if (formData.sinkRating === 0) missingFields.push('Sink rating');
+    if (formData.floorRating === 0) missingFields.push('Floor rating');
+    if (formData.toiletRating === 0) missingFields.push('Toilet rating');
+    if (formData.smellRating === 0) missingFields.push('Smell rating');
+    if (formData.nicenessRating === 0) missingFields.push('Niceness rating');
+    if (!formData.location?.trim()) missingFields.push('Location');
+    
+    if (missingFields.length > 0) {
       console.log('Missing fields:', missingFields);
-      alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      alert(`Please fill in all required fields:\
+\
+${missingFields.map(field => `• ${field}`).join('\
+')}\
+\
+Current form state:\
+• Image: ${formData.image ? '✓ Selected' : '✗ Missing'}\
+• Ratings: ${[formData.sinkRating, formData.floorRating, formData.toiletRating, formData.smellRating, formData.nicenessRating].filter(r => r > 0).length}/5 completed\
+• Location: ${formData.location ? '✓ Filled' : '✗ Empty'}`);
       return;
     }
 
@@ -1038,31 +1045,31 @@ const UploadForm = ({ onSuccess }) => {
           <CategoryRating
             category="sink"
             rating={formData.sinkRating}
-            onRatingChange={(rating) => setFormData({ ...formData, sinkRating: rating })}
+            onRatingChange={(rating) => setFormData(prev => ({ ...prev, sinkRating: rating }))}
             icon="🚰"
           />
           <CategoryRating
             category="floor"
             rating={formData.floorRating}
-            onRatingChange={(rating) => setFormData({ ...formData, floorRating: rating })}
+            onRatingChange={(rating) => setFormData(prev => ({ ...prev, floorRating: rating }))}
             icon="🧽"
           />
           <CategoryRating
             category="toilet"
             rating={formData.toiletRating}
-            onRatingChange={(rating) => setFormData({ ...formData, toiletRating: rating })}
+            onRatingChange={(rating) => setFormData(prev => ({ ...prev, toiletRating: rating }))}
             icon="🚽"
           />
           <CategoryRating
             category="smell"
             rating={formData.smellRating}
-            onRatingChange={(rating) => setFormData({ ...formData, smellRating: rating })}
+            onRatingChange={(rating) => setFormData(prev => ({ ...prev, smellRating: rating }))}
             icon="👃"
           />
           <CategoryRating
             category="niceness"
             rating={formData.nicenessRating}
-            onRatingChange={(rating) => setFormData({ ...formData, nicenessRating: rating })}
+            onRatingChange={(rating) => setFormData(prev => ({ ...prev, nicenessRating: rating }))}
             icon="✨"
           />
         </div>
@@ -1093,8 +1100,8 @@ const UploadForm = ({ onSuccess }) => {
         </label>
         <LocationAutocomplete
           value={formData.location}
-          onChange={(location) => setFormData({ ...formData, location })}
-          onLocationSelect={(coordinates) => setFormData({ ...formData, coordinates })}
+          onChange={(location) => setFormData(prev => ({ ...prev, location }))}
+          onLocationSelect={(coordinates) => setFormData(prev => ({ ...prev, coordinates }))}
           selectedLocation={formData.coordinates}
         />
         {formData.coordinates && (
@@ -1141,7 +1148,7 @@ const UploadForm = ({ onSuccess }) => {
         </p>
         {showLocationSelector && (
           <LocationSelector 
-            onLocationSelect={(coordinates) => setFormData({ ...formData, coordinates })}
+            onLocationSelect={(coordinates) => setFormData(prev => ({ ...prev, coordinates }))}
             selectedLocation={formData.coordinates}
           />
         )}
@@ -1159,7 +1166,7 @@ const UploadForm = ({ onSuccess }) => {
         </label>
         <textarea
           value={formData.comments}
-          onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
+          onChange={(e) => setFormData(prev => ({ ...prev, comments: e.target.value }))}
           placeholder="Share your thoughts about this loo..."
           rows="3"
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1552,9 +1559,7 @@ function MainApp() {
         onClose={() => setShowModal(false)}
       />
     </div>
-  );
+   );
 }
 
 export default App;
-
-
