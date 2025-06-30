@@ -677,6 +677,7 @@ const MobileGeolocation = ({ onLocationFound, onError }) => {
 const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onChange }) => {
   const [autocomplete, setAutocomplete] = useState(null);
   const inputRef = useRef(null);
+  const isManualInput = useRef(false);
 
   useEffect(() => {
     const initAutocomplete = async () => {
@@ -696,6 +697,12 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
         });
 
         autocompleteInstance.addListener('place_changed', () => {
+          // Only process if this is NOT a manual input
+          if (isManualInput.current) {
+            isManualInput.current = false;
+            return;
+          }
+
           const place = autocompleteInstance.getPlace();
           
           if (place.geometry && place.geometry.location) {
@@ -709,10 +716,14 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
               : place.formatted_address || place.name || value;
             
             console.log('Autocomplete selected:', locationText, location);
-            onChange(locationText);
-            if (onLocationSelect) {
-              onLocationSelect(location);
-            }
+            
+            // Use setTimeout to prevent form re-render issues
+            setTimeout(() => {
+              onChange(locationText);
+              if (onLocationSelect) {
+                onLocationSelect(location);
+              }
+            }, 0);
           }
         });
 
@@ -722,20 +733,25 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
       }
     };
 
-    if (inputRef.current && !autocomplete) {
+    if (inputRef.current && !autocomplete && process.env.REACT_APP_GOOGLE_MAPS_API_KEY) {
       initAutocomplete();
     }
   }, [onLocationSelect, onChange, value, autocomplete]);
+
+  const handleInputChange = (e) => {
+    isManualInput.current = true;
+    const newValue = e.target.value;
+    console.log('Manual input changing from:', value, 'to:', newValue);
+    onChange(newValue);
+  };
 
   return (
     <input
       ref={inputRef}
       type="text"
       value={value}
-      onChange={(e) => {
-        console.log('Input changing from:', value, 'to:', e.target.value);
-        onChange(e.target.value);
-      }}
+      onChange={handleInputChange}
+      onFocus={() => { isManualInput.current = false; }}
       placeholder="Search for a place... (e.g., Starbucks, McDonald's, Mall)"
       required
       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
