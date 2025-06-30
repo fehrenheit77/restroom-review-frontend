@@ -947,11 +947,18 @@ Current form state:\
       submitData.append('location', formData.location);
       submitData.append('comments', formData.comments);
       
+      // Debug: Log what we're actually sending
+      console.log('FormData contents:');
+      for (let [key, value] of submitData.entries()) {
+        console.log(`${key}:`, value);
+      }
+      
       if (formData.coordinates) {
         submitData.append('latitude', formData.coordinates.lat);
         submitData.append('longitude', formData.coordinates.lng);
       }
 
+      console.log('Making API request to:', `${API}/bathrooms`);
       const response = await axios.post(`${API}/bathrooms`, submitData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -977,8 +984,27 @@ Current form state:\
       onSuccess(response.data);
       alert('Loo review uploaded successfully!');
     } catch (error) {
-      console.error('Upload failed:', error);
-      alert('Failed to upload loo review. Please try again.');
+      console.error('Upload failed - Full error details:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error headers:', error.response?.headers);
+      
+      let errorMessage = 'Failed to upload loo review. Please try again.';
+      if (error.response?.data?.detail) {
+        errorMessage += `\
+\
+Error details: ${error.response.data.detail}`;
+      } else if (error.response?.data?.message) {
+        errorMessage += `\
+\
+Error details: ${error.response.data.message}`;
+      } else if (error.message) {
+        errorMessage += `\
+\
+Error details: ${error.message}`;
+      }
+      
+      alert(errorMessage);
     } finally {
       setUploading(false);
     }
@@ -1559,7 +1585,7 @@ function MainApp() {
         onClose={() => setShowModal(false)}
       />
     </div>
-   );
+  );
 }
 
 export default App;
