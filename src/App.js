@@ -626,7 +626,6 @@ const MobileCamera = ({ onImageCapture, onClose }) => {
     </div>
   );
 };
-
 // Mobile Geolocation Component
 const MobileGeolocation = ({ onLocationFound, onError }) => {
   const [loading, setLoading] = useState(false);
@@ -675,7 +674,6 @@ const MobileGeolocation = ({ onLocationFound, onError }) => {
   );
 };
 
-// FIXED LocationAutocomplete Component - Now Properly Persists Both Text and Coordinates
 const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onChange }) => {
   const [autocomplete, setAutocomplete] = useState(null);
   const inputRef = useRef(null);
@@ -691,6 +689,7 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
 
         await loader.load();
         
+        // Initialize Autocomplete
         const autocompleteInstance = new window.google.maps.places.Autocomplete(inputRef.current, {
           types: ['establishment', 'geocode'],
           fields: ['place_id', 'name', 'formatted_address', 'geometry']
@@ -698,8 +697,6 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
 
         autocompleteInstance.addListener('place_changed', () => {
           const place = autocompleteInstance.getPlace();
-          
-          console.log('🗺️ Place selected:', place);
           
           if (place.geometry && place.geometry.location) {
             const location = {
@@ -709,16 +706,12 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
             
             const locationText = place.name && place.formatted_address 
               ? `${place.name}, ${place.formatted_address}`
-              : place.formatted_address || place.name || '';
+              : place.formatted_address || place.name || value;
             
-            console.log('📍 Setting location:', locationText, location);
-            
-            // CRITICAL FIX: Set both location text AND coordinates at the same time
-            if (locationText.trim()) {
-              onChange(locationText);
-              if (onLocationSelect) {
-                onLocationSelect(location);
-              }
+            console.log('Autocomplete selected:', locationText, location);
+            onChange(locationText);
+            if (onLocationSelect) {
+              onLocationSelect(location);
             }
           }
         });
@@ -732,59 +725,23 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
     if (inputRef.current && !autocomplete) {
       initAutocomplete();
     }
-  }, [onLocationSelect, onChange, autocomplete]);
-
-  const handleInputChange = (e) => {
-    const newValue = e.target.value;
-    onChange(newValue);
-    
-    // If user manually clears or edits significantly, clear coordinates
-    if (!newValue.trim() || (selectedLocation && newValue.length < value.length * 0.5)) {
-      if (onLocationSelect) {
-        onLocationSelect(null);
-      }
-    }
-  };
+  }, [onLocationSelect, onChange, value, autocomplete]);
 
   return (
-    <div className="relative">
-      <input
-        ref={inputRef}
-        type="text"
-        value={value}
-        onChange={handleInputChange}
-        placeholder="Search for a place... (e.g., Starbucks, McDonald's, Mall)"
-        required
-        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-          selectedLocation 
-            ? 'border-green-300 bg-green-50' 
-            : 'border-gray-300'
-        }`}
-      />
-      
-      {selectedLocation && value.trim() && (
-        <div className="absolute right-2 top-2 text-green-600">
-          <span title="Location coordinates found">📍</span>
-        </div>
-      )}
-      
-      {value.trim() && (
-        <button
-          type="button"
-          onClick={() => {
-            onChange('');
-            onLocationSelect(null);
-          }}
-          className="absolute right-8 top-2 text-gray-400 hover:text-gray-600"
-          title="Clear location"
-        >
-          ×
-        </button>
-      )}
-    </div>
+    <input
+      ref={inputRef}
+      type="text"
+      value={value}
+      onChange={(e) => {
+        console.log('Input changing from:', value, 'to:', e.target.value);
+        onChange(e.target.value);
+      }}
+      placeholder="Search for a place... (e.g., Starbucks, McDonald's, Mall)"
+      required
+      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
   );
 };
-
 // Location Selector Component (Manual Map Selection)
 const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
   const [map, setMap] = useState(null);
@@ -812,8 +769,6 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
             lng: event.latLng.lng()
           };
           
-          console.log('🗺️ Map clicked:', location);
-          
           if (onLocationSelect) {
             onLocationSelect(location);
           }
@@ -839,39 +794,6 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
 
     initMap();
   }, [onLocationSelect]);
-
-  // Update map center when selectedLocation changes from autocomplete
-  useEffect(() => {
-    if (map && selectedLocation) {
-      console.log('🗺️ Updating map center to:', selectedLocation);
-      
-      const newCenter = { lat: selectedLocation.lat, lng: selectedLocation.lng };
-      map.setCenter(newCenter);
-      map.setZoom(15);
-      
-      if (marker) {
-        marker.setMap(null);
-      }
-      
-      const newMarker = new window.google.maps.Marker({
-        position: newCenter,
-        map: map,
-        title: 'Selected Location',
-        icon: {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12.5 2C8.5 2 5.5 5 5.5 9c0 6 7 12 7 12s7-6 7-12c0-4-3-7-7-7z" fill="#FF4444"/>
-              <circle cx="12.5" cy="9" r="3" fill="white"/>
-            </svg>
-          `),
-          scaledSize: new window.google.maps.Size(25, 25),
-          anchor: new window.google.maps.Point(12.5, 25)
-        }
-      });
-      
-      setMarker(newMarker);
-    }
-  }, [map, selectedLocation]);
 
   return (
     <div className="w-full h-64 border rounded-lg overflow-hidden">
@@ -933,7 +855,6 @@ const UploadForm = ({ onSuccess }) => {
   };
 
   const handleLocationFound = (location) => {
-    console.log('📍 Location found via geolocation:', location);
     setFormData({ 
       ...formData, 
       coordinates: location,
@@ -946,53 +867,51 @@ const UploadForm = ({ onSuccess }) => {
   };
 
   const handleLocationSelect = (coordinates) => {
-    console.log('📍 Location selected:', coordinates);
     setFormData({ ...formData, coordinates });
-  };
-
-  const handleLocationChange = (locationText) => {
-    console.log('📝 Location text changed:', locationText);
-    setFormData({ ...formData, location: locationText });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('🔍 Form submission started');
-    console.log('📋 Current form data:', {
-      hasImage: !!formData.image,
-      sinkRating: formData.sinkRating,
-      floorRating: formData.floorRating,
-      toiletRating: formData.toiletRating,
-      smellRating: formData.smellRating,
-      nicenessRating: formData.nicenessRating,
+    // Debug logging
+    console.log('Form submission attempt:', {
       location: formData.location,
-      locationLength: formData.location.length,
-      locationTrimmed: formData.location.trim(),
-      comments: formData.comments,
-      coordinates: formData.coordinates
+      locationLength: formData.location?.length,
+      locationTrimmed: formData.location?.trim(),
+      coordinates: formData.coordinates,
+      hasImage: !!formData.image,
+      ratings: {
+        sink: formData.sinkRating,
+        floor: formData.floorRating,
+        toilet: formData.toiletRating,
+        smell: formData.smellRating,
+        niceness: formData.nicenessRating
+      }
     });
-
-    // Enhanced validation with specific error messages
-    const missingFields = [];
     
-    if (!formData.image) missingFields.push('Photo');
-    if (formData.sinkRating === 0) missingFields.push('Sink rating');
-    if (formData.floorRating === 0) missingFields.push('Floor rating');
-    if (formData.toiletRating === 0) missingFields.push('Toilet rating');
-    if (formData.smellRating === 0) missingFields.push('Smell rating');
-    if (formData.nicenessRating === 0) missingFields.push('Niceness rating');
-    if (!formData.location || !formData.location.trim()) missingFields.push('Location');
-
-    if (missingFields.length > 0) {
-      const errorMsg = `Please fill in these required fields: ${missingFields.join(', ')}`;
-      alert(errorMsg);
-      console.log('❌ Validation failed:', errorMsg);
+    if (!formData.image || 
+        formData.sinkRating === 0 || 
+        formData.floorRating === 0 || 
+        formData.toiletRating === 0 || 
+        formData.smellRating === 0 || 
+        formData.nicenessRating === 0 || 
+        !formData.location.trim()) {
+      
+      const missingFields = [];
+      if (!formData.image) missingFields.push('Image');
+      if (formData.sinkRating === 0) missingFields.push('Sink rating');
+      if (formData.floorRating === 0) missingFields.push('Floor rating');
+      if (formData.toiletRating === 0) missingFields.push('Toilet rating');
+      if (formData.smellRating === 0) missingFields.push('Smell rating');
+      if (formData.nicenessRating === 0) missingFields.push('Niceness rating');
+      if (!formData.location.trim()) missingFields.push('Location');
+      
+      console.log('Missing fields:', missingFields);
+      alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
       return;
     }
 
     setUploading(true);
-    console.log('✅ Validation passed, submitting...');
 
     try {
       const submitData = new FormData();
@@ -1002,7 +921,7 @@ const UploadForm = ({ onSuccess }) => {
       submitData.append('toilet_rating', formData.toiletRating);
       submitData.append('smell_rating', formData.smellRating);
       submitData.append('niceness_rating', formData.nicenessRating);
-      submitData.append('location', formData.location.trim());
+      submitData.append('location', formData.location);
       submitData.append('comments', formData.comments);
       
       if (formData.coordinates) {
@@ -1010,49 +929,33 @@ const UploadForm = ({ onSuccess }) => {
         submitData.append('longitude', formData.coordinates.lng);
       }
 
-      console.log('📤 Sending POST request to:', `${API}/bathrooms`);
-      
       const response = await axios.post(`${API}/bathrooms`, submitData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      console.log('📨 Server response:', response.data);
-
-      // Check for success response
-      if (response.data && (response.data.success || response.data.id)) {
-        console.log('✅ Upload successful!');
-        
-        // Reset form
-        const newFormData = {
-          image: null,
-          sinkRating: 0,
-          floorRating: 0,
-          toiletRating: 0,
-          smellRating: 0,
-          nicenessRating: 0,
-          location: '',
-          coordinates: null,
-          comments: ''
-        };
-        
-        setFormData(newFormData);
-        setPreviewUrl(null);
-        setShowLocationSelector(false);
-        
-        // Call success callback
-        const bathroomData = response.data.bathroom || response.data;
-        onSuccess(bathroomData);
-        
-        alert('🎉 Loo review uploaded successfully!');
-      } else {
-        throw new Error('Server did not confirm successful upload');
-      }
+      setFormData({
+        image: null,
+        sinkRating: 0,
+        floorRating: 0,
+        toiletRating: 0,
+        smellRating: 0,
+        nicenessRating: 0,
+        location: '',
+        coordinates: null,
+        comments: ''
+      });
+      setPreviewUrl(null);
+      setShowLocationSelector(false);
+      
+      e.target.reset();
+      
+      onSuccess(response.data);
+      alert('Loo review uploaded successfully!');
     } catch (error) {
-      console.error('❌ Upload failed:', error);
-      const errorMsg = error.response?.data?.detail || error.message || 'Upload failed';
-      alert(`Failed to upload loo review: ${errorMsg}`);
+      console.error('Upload failed:', error);
+      alert('Failed to upload loo review. Please try again.');
     } finally {
       setUploading(false);
     }
@@ -1093,6 +996,7 @@ const UploadForm = ({ onSuccess }) => {
             type="file"
             accept="image/*"
             onChange={handleImageChange}
+            required
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
         )}
@@ -1168,18 +1072,26 @@ const UploadForm = ({ onSuccess }) => {
       {/* Location with Autocomplete */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Location *
+          Location * 
           <span className="text-xs text-gray-500 ml-2">(Search for businesses, addresses, landmarks)</span>
         </label>
         <LocationAutocomplete
           value={formData.location}
-          onChange={handleLocationChange}
-          onLocationSelect={handleLocationSelect}
+          onChange={(location) => setFormData({ ...formData, location })}
+          onLocationSelect={(coordinates) => setFormData({ ...formData, coordinates })}
           selectedLocation={formData.coordinates}
         />
-        {formData.coordinates && formData.location.trim() && (
+        {formData.coordinates && (
           <div className="mt-2 text-sm text-green-600 bg-green-50 p-2 rounded">
             ✓ Location found with coordinates: {formData.coordinates.lat.toFixed(6)}, {formData.coordinates.lng.toFixed(6)}
+          </div>
+        )}
+        
+        {formData.location && !formData.coordinates && (
+          <div className="mt-2 text-sm text-blue-600 bg-blue-50 p-2 rounded">
+            📍 Manual location text entered: "{formData.location}"
+            <br />
+            <span className="text-xs">Coordinates will be geocoded automatically or can be set manually below</span>
           </div>
         )}
         
@@ -1213,7 +1125,7 @@ const UploadForm = ({ onSuccess }) => {
         </p>
         {showLocationSelector && (
           <LocationSelector 
-            onLocationSelect={handleLocationSelect}
+            onLocationSelect={(coordinates) => setFormData({ ...formData, coordinates })}
             selectedLocation={formData.coordinates}
           />
         )}
@@ -1243,7 +1155,7 @@ const UploadForm = ({ onSuccess }) => {
         disabled={uploading}
         className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
       >
-        {uploading ? 'Uploading Review...' : 'Submit Rating'}
+        {uploading ? 'Uploading...' : 'Submit Rating'}
       </button>
       
       {/* Mobile Camera Modal */}
@@ -1258,7 +1170,7 @@ const UploadForm = ({ onSuccess }) => {
 };
 
 // Bathroom Card Component
-const BathroomCard = ({ bathroom, onClick, onDelete, currentUserId }) => {
+const BathroomCard = ({ bathroom, onClick }) => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -1269,33 +1181,11 @@ const BathroomCard = ({ bathroom, onClick, onDelete, currentUserId }) => {
     });
   };
 
-  const handleDelete = async (e) => {
-    e.stopPropagation(); // Prevent card click
-    if (window.confirm('Are you sure you want to delete this review?')) {
-      try {
-        await onDelete(bathroom.id);
-      } catch (error) {
-        alert('Failed to delete review. Please try again.');
-      }
-    }
-  };
-
   return (
     <div 
-      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow relative"
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
       onClick={() => onClick && onClick(bathroom)}
     >
-      {/* Delete button for user's own reviews */}
-      {currentUserId === bathroom.user_id && (
-        <button
-          onClick={handleDelete}
-          className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700 z-10"
-          title="Delete review"
-        >
-          ×
-        </button>
-      )}
-      
       <img
         src={`${BACKEND_URL}${bathroom.image_url}`}
         alt="Loo"
@@ -1469,7 +1359,6 @@ function MainApp() {
   }, []);
 
   const handleUploadSuccess = (newBathroom) => {
-    console.log('🎉 Upload success callback triggered', newBathroom);
     setBathrooms([newBathroom, ...bathrooms]);
     setView('gallery');
   };
@@ -1477,17 +1366,6 @@ function MainApp() {
   const handleMarkerClick = (bathroom) => {
     setSelectedBathroom(bathroom);
     setShowModal(true);
-  };
-
-  const handleDeleteReview = async (bathroomId) => {
-    try {
-      await axios.delete(`${API}/bathrooms/${bathroomId}`);
-      setBathrooms(bathrooms.filter(b => b.id !== bathroomId));
-      alert('Review deleted successfully!');
-    } catch (error) {
-      console.error('Failed to delete review:', error);
-      throw error;
-    }
   };
 
   const bathroomsWithCoordinates = bathrooms.filter(b => b.latitude && b.longitude);
@@ -1601,12 +1479,10 @@ function MainApp() {
                   <BathroomCard 
                     key={bathroom.id} 
                     bathroom={bathroom} 
-                    currentUserId={user.id}
                     onClick={(bathroom) => {
                       setSelectedBathroom(bathroom);
                       setShowModal(true);
                     }}
-                    onDelete={handleDeleteReview}
                   />
                 ))}
               </div>
@@ -1664,3 +1540,5 @@ function MainApp() {
 }
 
 export default App;
+
+
