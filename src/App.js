@@ -404,11 +404,13 @@ const OverallRating = ({
   );
 };
 
-// Google Map Component
-const GoogleMap = ({ bathrooms, onMapClick, onMarkerClick, center = { lat: 37.7749, lng: -122.4194 } }) => {
+// Enhanced Google Map Component with Center Updates and Current Location
+const GoogleMap = ({ bathrooms, onMapClick, onMarkerClick, center = { lat: 37.7749, lng: -122.4194 }, onCenterChange }) => {
   const [map, setMap] = useState(null);
   const [markers, setMarkers] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [userLocationMarker, setUserLocationMarker] = useState(null);
+  const [gettingLocation, setGettingLocation] = useState(false);
 
   const handleMapClick = useCallback((event) => {
     if (onMapClick) {
@@ -424,6 +426,77 @@ const GoogleMap = ({ bathrooms, onMapClick, onMarkerClick, center = { lat: 37.77
       onMarkerClick(bathroom);
     }
   }, [onMarkerClick]);
+
+  // Get user's current location
+  const getCurrentLocation = async () => {
+    setGettingLocation(true);
+    try {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLocation = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+            
+            // Update map center
+            if (map) {
+              map.setCenter(userLocation);
+              map.setZoom(15);
+              
+              // Remove existing user location marker
+              if (userLocationMarker) {
+                userLocationMarker.setMap(null);
+              }
+              
+              // Add new user location marker
+              const marker = new window.google.maps.Marker({
+                position: userLocation,
+                map: map,
+                title: 'Your Location',
+                icon: {
+                  url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                    <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="15" cy="15" r="12" fill="#4285F4" stroke="white" stroke-width="3"/>
+                      <circle cx="15" cy="15" r="6" fill="white"/>
+                      <circle cx="15" cy="15" r="3" fill="#4285F4"/>
+                    </svg>
+                  `),
+                  scaledSize: new window.google.maps.Size(30, 30),
+                  anchor: new window.google.maps.Point(15, 15)
+                }
+              });
+              
+              setUserLocationMarker(marker);
+              
+              // Notify parent component about center change
+              if (onCenterChange) {
+                onCenterChange(userLocation);
+              }
+            }
+            setGettingLocation(false);
+          },
+          (error) => {
+            console.error('Geolocation error:', error);
+            alert('Unable to get your location. Please check your browser permissions.');
+            setGettingLocation(false);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000
+          }
+        );
+      } else {
+        alert('Geolocation is not supported by this browser.');
+        setGettingLocation(false);
+      }
+    } catch (error) {
+      console.error('Error getting location:', error);
+      alert('Failed to get location. Please try again.');
+      setGettingLocation(false);
+    }
+  };
 
   useEffect(() => {
     const initMap = async () => {
@@ -456,7 +529,15 @@ const GoogleMap = ({ bathrooms, onMapClick, onMarkerClick, center = { lat: 37.77
     if (!map) {
       initMap();
     }
-  }, [center, handleMapClick, map]);
+  }, [handleMapClick]);
+
+  // Update map center when center prop changes
+  useEffect(() => {
+    if (map && center) {
+      map.setCenter(center);
+      map.setZoom(15);
+    }
+  }, [map, center]);
 
   useEffect(() => {
     if (!map || !isLoaded || !bathrooms) return;
@@ -491,9 +572,32 @@ const GoogleMap = ({ bathrooms, onMapClick, onMarkerClick, center = { lat: 37.77
     setMarkers(newMarkers);
   }, [map, bathrooms, isLoaded, handleMarkerClick]);
 
-  return <div id="map" className="w-full h-full rounded-lg shadow-lg" />;
+  return (
+    <div className="relative w-full h-full">
+      <div id="map" className="w-full h-full rounded-lg shadow-lg" />
+      
+      {/* Current Location Button */}
+      <button
+        onClick={getCurrentLocation}
+        disabled={gettingLocation}
+        className="absolute top-4 right-4 bg-white hover:bg-gray-50 disabled:bg-gray-100 border border-gray-300 rounded-lg shadow-md p-3 flex items-center justify-center transition-colors"
+        title="Go to my location"
+      >
+        {gettingLocation ? (
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+        ) : (
+          <svg 
+            className="w-5 h-5 text-gray-700" 
+            fill="currentColor" 
+            viewBox="0 0 20 20"
+          >
+            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+          </svg>
+        )}
+      </button>
+    </div>
+  );
 };
-
 // Mobile Camera Component
 const MobileCamera = ({ onImageCapture, onClose }) => {
   const [isNative, setIsNative] = useState(false);
@@ -697,36 +801,7 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
           fields: ['place_id', 'name', 'formatted_address', 'geometry']
         });
 
-        autocompleteInstance.addListener('place_changed', () => {
-          // Only process if this is NOT a manual input
-          if (isManualInput.current) {
-            isManualInput.current = false;
-            return;
-          }
-
-          const place = autocompleteInstance.getPlace();
-          
-          if (place.geometry && place.geometry.location) {
-            const location = {
-              lat: place.geometry.location.lat(),
-              lng: place.geometry.location.lng()
-            };
-            
-            const locationText = place.name && place.formatted_address 
-              ? `${place.name}, ${place.formatted_address}`
-              : place.formatted_address || place.name || value;
-            
-            console.log('Autocomplete selected:', locationText, location);
-            
-            // Use setTimeout to prevent form re-render issues
-            setTimeout(() => {
-              onChange(locationText);
-              if (onLocationSelect) {
-                onLocationSelect(location);
-              }
-            }, 0);
-          }
-        });
+        };
 
         setAutocomplete(autocompleteInstance);
       } catch (error) {
@@ -1539,44 +1614,58 @@ function MainApp() {
           </div>
         )}
 
-        {view === 'map' && (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">
-                Loo Locations Map
-              </h2>
-              <p className="text-gray-600">
-                {bathroomsWithCoordinates.length} mapped locations
-              </p>
-            </div>
+      {view === 'map' && (
+  <div>
+    <div className="flex justify-between items-center mb-6">
+      <h2 className="text-2xl font-bold text-gray-800">
+        Loo Locations Map
+      </h2>
+      <p className="text-gray-600">
+        {bathroomsWithCoordinates.length} mapped locations
+      </p>
+    </div>
 
-            {bathroomsWithCoordinates.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg shadow">
-                <p className="text-gray-500 text-lg mb-4">No mapped loo locations yet!</p>
-                <p className="text-gray-400 mb-4">Add location coordinates when rating loos to see them on the map.</p>
-                <button
-                  onClick={() => setView('upload')}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
-                >
-                  Rate a Loo with Location
-                </button>
+    {bathroomsWithCoordinates.length === 0 ? (
+      <div className="text-center py-12 bg-white rounded-lg shadow">
+        <p className="text-gray-500 text-lg mb-4">No mapped loo locations yet!</p>
+        <p className="text-gray-400 mb-4">Add location coordinates when rating loos to see them on the map.</p>
+        <button
+          onClick={() => setView('upload')}
+          className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+        >
+          Rate a Loo with Location
+        </button>
+      </div>
+    ) : (
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="h-96 lg:h-[500px]">
+          <GoogleMap
+            bathrooms={bathroomsWithCoordinates}
+            onMarkerClick={handleMarkerClick}
+            center={undefined} // Let map use default or current location
+          />
+        </div>
+        <div className="p-4 bg-gray-50 text-sm text-gray-600 flex items-center justify-between">
+          <span>💡 Click on map markers to view loo details. Click the location button to center on your location.</span>
+          <div className="flex items-center space-x-2 text-xs">
+            <span className="flex items-center">
+              <svg className="w-4 h-4 mr-1 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+              </svg>
+              Your Location
+            </span>
+            <span className="flex items-center ml-4">
+              <div className="w-4 h-4 mr-1 rounded-full bg-blue-600 flex items-center justify-center">
+                <span className="text-white text-xs font-bold">5</span>
               </div>
-            ) : (
-              <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div className="h-96 lg:h-[500px]">
-                  <GoogleMap
-                    bathrooms={bathroomsWithCoordinates}
-                    onMarkerClick={handleMarkerClick}
-                  />
-                </div>
-                <div className="p-4 bg-gray-50 text-sm text-gray-600">
-                  💡 Click on map markers to view loo details. Markers show the rating number.
-                </div>
-              </div>
-            )}
+              Bathroom Ratings
+            </span>
           </div>
-        )}
-      </main>
+        </div>
+      </div>
+    )}
+  </div>
+)}
 
       {/* Bathroom Detail Modal */}
       <BathroomModal
