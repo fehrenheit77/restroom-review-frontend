@@ -529,7 +529,7 @@ const GoogleMap = ({ bathrooms, onMapClick, onMarkerClick, center = { lat: 37.77
     if (!map) {
       initMap();
     }
-  }, [handleMapClick]);
+  }, [center, handleMapClick, map]);
 
   // Update map center when center prop changes
   useEffect(() => {
@@ -598,6 +598,7 @@ const GoogleMap = ({ bathrooms, onMapClick, onMarkerClick, center = { lat: 37.77
     </div>
   );
 };
+
 // Mobile Camera Component
 const MobileCamera = ({ onImageCapture, onClose }) => {
   const [isNative, setIsNative] = useState(false);
@@ -801,7 +802,36 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
           fields: ['place_id', 'name', 'formatted_address', 'geometry']
         });
 
-        };
+        autocompleteInstance.addListener('place_changed', () => {
+          // Only process if this is NOT a manual input
+          if (isManualInput.current) {
+            isManualInput.current = false;
+            return;
+          }
+
+          const place = autocompleteInstance.getPlace();
+          
+          if (place.geometry && place.geometry.location) {
+            const location = {
+              lat: place.geometry.location.lat(),
+              lng: place.geometry.location.lng()
+            };
+            
+            const locationText = place.name && place.formatted_address 
+              ? `${place.name}, ${place.formatted_address}`
+              : place.formatted_address || place.name || value;
+            
+            console.log('Autocomplete selected:', locationText, location);
+            
+            // Use setTimeout to prevent form re-render issues
+            setTimeout(() => {
+              onChange(locationText);
+              if (onLocationSelect) {
+                onLocationSelect(location);
+              }
+            }, 0);
+          }
+        });
 
         setAutocomplete(autocompleteInstance);
       } catch (error) {
@@ -997,15 +1027,7 @@ const UploadForm = ({ onSuccess }) => {
     
     if (missingFields.length > 0) {
       console.log('Missing fields:', missingFields);
-      alert(`Please fill in all required fields:\
-\
-${missingFields.map(field => `• ${field}`).join('\
-')}\
-\
-Current form state:\
-• Image: ${formData.image ? '✓ Selected' : '✗ Missing'}\
-• Ratings: ${[formData.sinkRating, formData.floorRating, formData.toiletRating, formData.smellRating, formData.nicenessRating].filter(r => r > 0).length}/5 completed\
-• Location: ${formData.location ? '✓ Filled' : '✗ Empty'}`);
+      alert(`Please fill in all required fields:\n\n${missingFields.map(field => `• ${field}`).join('\n')}\n\nCurrent form state:\n• Image: ${formData.image ? '✓ Selected' : '✗ Missing'}\n• Ratings: ${[formData.sinkRating, formData.floorRating, formData.toiletRating, formData.smellRating, formData.nicenessRating].filter(r => r > 0).length}/5 completed\n• Location: ${formData.location ? '✓ Filled' : '✗ Empty'}`);
       return;
     }
 
@@ -1066,17 +1088,11 @@ Current form state:\
       
       let errorMessage = 'Failed to upload loo review. Please try again.';
       if (error.response?.data?.detail) {
-        errorMessage += `\
-\
-Error details: ${error.response.data.detail}`;
+        errorMessage += `\n\nError details: ${error.response.data.detail}`;
       } else if (error.response?.data?.message) {
-        errorMessage += `\
-\
-Error details: ${error.response.data.message}`;
+        errorMessage += `\n\nError details: ${error.response.data.message}`;
       } else if (error.message) {
-        errorMessage += `\
-\
-Error details: ${error.message}`;
+        errorMessage += `\n\nError details: ${error.message}`;
       }
       
       alert(errorMessage);
@@ -1614,58 +1630,58 @@ function MainApp() {
           </div>
         )}
 
-      {view === 'map' && (
-  <div>
-    <div className="flex justify-between items-center mb-6">
-      <h2 className="text-2xl font-bold text-gray-800">
-        Loo Locations Map
-      </h2>
-      <p className="text-gray-600">
-        {bathroomsWithCoordinates.length} mapped locations
-      </p>
-    </div>
+        {view === 'map' && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">
+                Loo Locations Map
+              </h2>
+              <p className="text-gray-600">
+                {bathroomsWithCoordinates.length} mapped locations
+              </p>
+            </div>
 
-    {bathroomsWithCoordinates.length === 0 ? (
-      <div className="text-center py-12 bg-white rounded-lg shadow">
-        <p className="text-gray-500 text-lg mb-4">No mapped loo locations yet!</p>
-        <p className="text-gray-400 mb-4">Add location coordinates when rating loos to see them on the map.</p>
-        <button
-          onClick={() => setView('upload')}
-          className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
-        >
-          Rate a Loo with Location
-        </button>
-      </div>
-    ) : (
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="h-96 lg:h-[500px]">
-          <GoogleMap
-            bathrooms={bathroomsWithCoordinates}
-            onMarkerClick={handleMarkerClick}
-            center={undefined} // Let map use default or current location
-          />
-        </div>
-        <div className="p-4 bg-gray-50 text-sm text-gray-600 flex items-center justify-between">
-          <span>💡 Click on map markers to view loo details. Click the location button to center on your location.</span>
-          <div className="flex items-center space-x-2 text-xs">
-            <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-              </svg>
-              Your Location
-            </span>
-            <span className="flex items-center ml-4">
-              <div className="w-4 h-4 mr-1 rounded-full bg-blue-600 flex items-center justify-center">
-                <span className="text-white text-xs font-bold">5</span>
+            {bathroomsWithCoordinates.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-lg shadow">
+                <p className="text-gray-500 text-lg mb-4">No mapped loo locations yet!</p>
+                <p className="text-gray-400 mb-4">Add location coordinates when rating loos to see them on the map.</p>
+                <button
+                  onClick={() => setView('upload')}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+                >
+                  Rate a Loo with Location
+                </button>
               </div>
-              Bathroom Ratings
-            </span>
+            ) : (
+              <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div className="h-96 lg:h-[500px]">
+                  <GoogleMap
+                    bathrooms={bathroomsWithCoordinates}
+                    onMarkerClick={handleMarkerClick}
+                  />
+                </div>
+                <div className="p-4 bg-gray-50 text-sm text-gray-600 flex items-center justify-between">
+                  <span>💡 Click on map markers to view loo details. Click the location button to center on your location.</span>
+                  <div className="flex items-center space-x-2 text-xs">
+                    <span className="flex items-center">
+                      <svg className="w-4 h-4 mr-1 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                      </svg>
+                      Your Location
+                    </span>
+                    <span className="flex items-center ml-4">
+                      <div className="w-4 h-4 mr-1 rounded-full bg-blue-600 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">5</span>
+                      </div>
+                      Bathroom Ratings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
-    )}
-  </div>
-)}
+        )}
+      </main>
 
       {/* Bathroom Detail Modal */}
       <BathroomModal
