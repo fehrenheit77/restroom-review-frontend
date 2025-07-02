@@ -427,76 +427,86 @@ const GoogleMap = ({ bathrooms, onMapClick, onMarkerClick, center = { lat: 37.77
     }
   }, [onMarkerClick]);
 
-  // Get user's current location
-  const getCurrentLocation = async () => {
-    setGettingLocation(true);
-    try {
-      if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const userLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            };
-            
-            // Update map center
-            if (map) {
-              map.setCenter(userLocation);
-              map.setZoom(15);
-              
-              // Remove existing user location marker
-              if (userLocationMarker) {
-                userLocationMarker.setMap(null);
-              }
-              
-              // Add new user location marker
-              const marker = new window.google.maps.Marker({
-                position: userLocation,
-                map: map,
-                title: 'Your Location',
-                icon: {
-                  url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                    <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="15" cy="15" r="12" fill="#4285F4" stroke="white" stroke-width="3"/>
-                      <circle cx="15" cy="15" r="6" fill="white"/>
-                      <circle cx="15" cy="15" r="3" fill="#4285F4"/>
-                    </svg>
-                  `),
-                  scaledSize: new window.google.maps.Size(30, 30),
-                  anchor: new window.google.maps.Point(15, 15)
-                }
-              });
-              
-              setUserLocationMarker(marker);
-              
-              // Notify parent component about center change
-              if (onCenterChange) {
-                onCenterChange(userLocation);
-              }
-            }
-            setGettingLocation(false);
-          },
-          (error) => {
-            console.error('Geolocation error:', error);
-            alert('Unable to get your location. Please check your browser permissions.');
-            setGettingLocation(false);
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 300000
+ // Get user's current location
+const getCurrentLocation = () => {
+  setGettingLocation(true);
+  
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by this browser.');
+    setGettingLocation(false);
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const userLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+      
+      console.log('Got user location:', userLocation);
+      
+      // Update map center
+      if (map) {
+        map.setCenter(userLocation);
+        map.setZoom(16);
+        
+        // Remove existing user location marker
+        if (userLocationMarker) {
+          userLocationMarker.setMap(null);
+        }
+        
+        // Add new user location marker
+        const marker = new window.google.maps.Marker({
+          position: userLocation,
+          map: map,
+          title: 'Your Current Location',
+          icon: {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+              <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="15" cy="15" r="12" fill="#4285F4" stroke="white" stroke-width="3"/>
+                <circle cx="15" cy="15" r="6" fill="white"/>
+                <circle cx="15" cy="15" r="3" fill="#4285F4"/>
+              </svg>
+            `),
+            scaledSize: new window.google.maps.Size(30, 30),
+            anchor: new window.google.maps.Point(15, 15)
           }
-        );
-      } else {
-        alert('Geolocation is not supported by this browser.');
-        setGettingLocation(false);
+        });
+        
+        setUserLocationMarker(marker);
       }
-    } catch (error) {
-      console.error('Error getting location:', error);
-      alert('Failed to get location. Please try again.');
       setGettingLocation(false);
+    },
+    (error) => {
+      console.error('Geolocation error:', error);
+      let errorMessage = 'Unable to get your location. ';
+      
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage += 'Please allow location access in your browser settings.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage += 'Location information is unavailable.';
+          break;
+        case error.TIMEOUT:
+          errorMessage += 'Location request timed out.';
+          break;
+        default:
+          errorMessage += 'An unknown error occurred.';
+          break;
+      }
+      
+      alert(errorMessage);
+      setGettingLocation(false);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 300000
     }
-  };
+  );
+};
 
   useEffect(() => {
     const initMap = async () => {
