@@ -1126,6 +1126,8 @@ const UploadForm = ({ onSuccess }) => {
       coordinates: location,
       location: prev.location || `Location: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`
     }));
+    // Auto-show map when location is found
+    setShowLocationSelector(true);
   };
 
   const handleLocationError = (error) => {
@@ -1361,7 +1363,13 @@ const UploadForm = ({ onSuccess }) => {
         <LocationAutocomplete
           value={formData.location}
           onChange={(location) => setFormData(prev => ({ ...prev, location }))}
-          onLocationSelect={(coordinates) => setFormData(prev => ({ ...prev, coordinates }))}
+          onLocationSelect={(coordinates) => {
+            setFormData(prev => ({ ...prev, coordinates }));
+            // Auto-show map when location is selected via autocomplete
+            if (coordinates) {
+              setShowLocationSelector(true);
+            }
+          }}
           selectedLocation={formData.coordinates}
         />
         {formData.coordinates && (
@@ -1389,22 +1397,24 @@ const UploadForm = ({ onSuccess }) => {
         )}
       </div>
 
-      {/* Manual Location Selector (Optional) */}
+      {/* Enhanced Location Map (Auto-show when location selected) */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium text-gray-700">
-            Manual Location Selection (optional)
+            Location Map {formData.coordinates ? '' : '(optional)'}
           </label>
           <button
             type="button"
             onClick={() => setShowLocationSelector(!showLocationSelector)}
             className="text-blue-600 hover:text-blue-800 text-sm"
           >
-            {showLocationSelector ? 'Hide Manual Map' : 'Show Manual Map'}
+            {showLocationSelector ? 'Hide Map' : 'Show Map'}
           </button>
         </div>
         <p className="text-xs text-gray-500 mb-2">
-          Use this if you want to manually click on the map to select coordinates
+          {formData.coordinates 
+            ? 'Your selected location is shown on the map below' 
+            : 'Click on the map to manually select coordinates or use "My Location" button'}
         </p>
         {showLocationSelector && (
           <LocationSelector 
@@ -1415,6 +1425,13 @@ const UploadForm = ({ onSuccess }) => {
         {formData.coordinates && !showLocationSelector && (
           <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
             📍 Coordinates: {formData.coordinates.lat.toFixed(6)}, {formData.coordinates.lng.toFixed(6)}
+            <button
+              type="button"
+              onClick={() => setShowLocationSelector(true)}
+              className="ml-2 text-blue-600 hover:text-blue-800 text-xs underline"
+            >
+              View on Map
+            </button>
           </div>
         )}
       </div>
