@@ -875,10 +875,79 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
   );
 };
 
-// Location Selector Component (Manual Map Selection)
+// Enhanced Location Selector Component with Current Location
 const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
   const [map, setMap] = useState(null);
   const [marker, setMarker] = useState(null);
+  const [userLocationMarker, setUserLocationMarker] = useState(null);
+  const [gettingLocation, setGettingLocation] = useState(false);
+
+  const getCurrentLocation = () => {
+    setGettingLocation(true);
+    
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by this browser.');
+      setGettingLocation(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const userLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        
+        console.log('Got user location for selector:', userLocation);
+        
+        if (map) {
+          map.setCenter(userLocation);
+          map.setZoom(16);
+          
+          // Remove existing user location marker
+          if (userLocationMarker) {
+            userLocationMarker.setMap(null);
+          }
+          
+          // Add new user location marker
+          const marker = new window.google.maps.Marker({
+            position: userLocation,
+            map: map,
+            title: 'Your Current Location',
+            icon: {
+              url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12.5" cy="12.5" r="10" fill="#34D399" stroke="white" stroke-width="2"/>
+                  <circle cx="12.5" cy="12.5" r="5" fill="white"/>
+                  <circle cx="12.5" cy="12.5" r="2" fill="#34D399"/>
+                </svg>
+              `),
+              scaledSize: new window.google.maps.Size(25, 25),
+              anchor: new window.google.maps.Point(12.5, 12.5)
+            }
+          });
+          
+          setUserLocationMarker(marker);
+          
+          // Auto-select this location
+          if (onLocationSelect) {
+            onLocationSelect(userLocation);
+          }
+        }
+        setGettingLocation(false);
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        alert('Unable to get your location. Please click on the map to select manually.');
+        setGettingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 300000
+      }
+    );
+  };
 
   useEffect(() => {
     const initMap = async () => {
@@ -913,7 +982,17 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
           const newMarker = new window.google.maps.Marker({
             position: location,
             map: mapInstance,
-            title: 'Selected Location'
+            title: 'Selected Location',
+            icon: {
+              url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12.5 2C8.36 2 5 5.36 5 9.5c0 6.25 7.5 12.5 7.5 12.5s7.5-6.25 7.5-12.5C20 5.36 16.64 2 12.5 2z" fill="#EF4444"/>
+                  <circle cx="12.5" cy="9.5" r="3" fill="white"/>
+                </svg>
+              `),
+              scaledSize: new window.google.maps.Size(25, 25),
+              anchor: new window.google.maps.Point(12.5, 22)
+            }
           });
           
           setMarker(newMarker);
@@ -928,18 +1007,72 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
     initMap();
   }, [onLocationSelect]);
 
+  // Update marker when selectedLocation changes
+  useEffect(() => {
+    if (map && selectedLocation) {
+      map.setCenter(selectedLocation);
+      map.setZoom(16);
+      
+      if (marker) {
+        marker.setMap(null);
+      }
+
+      const newMarker = new window.google.maps.Marker({
+        position: selectedLocation,
+        map: map,
+        title: 'Selected Location',
+        icon: {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12.5 2C8.36 2 5 5.36 5 9.5c0 6.25 7.5 12.5 7.5 12.5s7.5-6.25 7.5-12.5C20 5.36 16.64 2 12.5 2z" fill="#EF4444"/>
+              <circle cx="12.5" cy="9.5" r="3" fill="white"/>
+            </svg>
+          `),
+          scaledSize: new window.google.maps.Size(25, 25),
+          anchor: new window.google.maps.Point(12.5, 22)
+        }
+      });
+      
+      setMarker(newMarker);
+    }
+  }, [map, selectedLocation]);
+
   return (
-    <div className="w-full h-64 border rounded-lg overflow-hidden">
-      <div id="location-map" className="w-full h-full" />
+    <div className="w-full">
+      <div className="mb-3 flex justify-between items-center">
+        <span className="text-sm font-medium text-gray-700">Click on map to select location</span>
+        <button
+          type="button"
+          onClick={getCurrentLocation}
+          disabled={gettingLocation}
+          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-1 rounded text-sm flex items-center space-x-1"
+        >
+          {gettingLocation ? (
+            <>
+              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+              <span>Getting...</span>
+            </>
+          ) : (
+            <>
+              <span>📍</span>
+              <span>My Location</span>
+            </>
+          )}
+        </button>
+      </div>
+      
+      <div className="w-full h-64 border rounded-lg overflow-hidden">
+        <div id="location-map" className="w-full h-full" />
+      </div>
+      
       {selectedLocation && (
-        <div className="p-2 bg-gray-50 text-sm text-gray-600">
-          Selected: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
+        <div className="mt-2 p-2 bg-gray-50 text-sm text-gray-600 rounded">
+          📍 Selected: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
         </div>
       )}
     </div>
   );
 };
-
 // Upload Form Component
 const UploadForm = ({ onSuccess }) => {
   const { user } = useAuth();
