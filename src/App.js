@@ -405,6 +405,7 @@ const OverallRating = ({
 };
 
 // Enhanced Google Map Component with Center Updates and Current Location
+// Enhanced Google Map Component with Center Updates and Current Location
 const GoogleMap = ({ bathrooms, onMapClick, onMarkerClick, center = { lat: 37.7749, lng: -122.4194 }, onCenterChange }) => {
   const [map, setMap] = useState(null);
   const [markers, setMarkers] = useState([]);
