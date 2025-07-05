@@ -1643,6 +1643,7 @@ function MainApp() {
   const [view, setView] = useState('upload');
   const [selectedBathroom, setSelectedBathroom] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [mapCenter, setMapCenter] = useState({ lat: 37.7749, lng: -122.4194 });
 
   const fetchBathrooms = async () => {
     try {
@@ -1668,7 +1669,16 @@ function MainApp() {
     setSelectedBathroom(bathroom);
     setShowModal(true);
   };
-
+  const handleGalleryItemClick = (bathroom) => {
+    setSelectedBathroom(bathroom);
+    setShowModal(true);
+  
+  // If the bathroom has coordinates, update map center for when user switches to map view
+  if (bathroom.latitude && bathroom.longitude) {
+    setMapCenter({ lat: bathroom.latitude, lng: bathroom.longitude });
+    console.log('Gallery item clicked, setting map center to:', { lat: bathroom.latitude, lng: bathroom.longitude });
+  }
+};
   const bathroomsWithCoordinates = bathrooms.filter(b => b.latitude && b.longitude);
 
   if (loading) {
