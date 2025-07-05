@@ -1791,7 +1791,7 @@ function MainApp() {
                     key={bathroom.id} 
                     bathroom={bathroom} 
                     onClick={handleGalleryItemClick}
-                    }}
+                    }
                   />
                 ))}
               </div>
