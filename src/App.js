@@ -1790,9 +1790,7 @@ function MainApp() {
                   <BathroomCard 
                     key={bathroom.id} 
                     bathroom={bathroom} 
-                    onClick={(bathroom) => {
-                      setSelectedBathroom(bathroom);
-                      setShowModal(true);
+                    onClick={handleGalleryItemClick}
                     }}
                   />
                 ))}
@@ -1829,7 +1827,8 @@ function MainApp() {
                   <GoogleMap
                     bathrooms={bathroomsWithCoordinates}
                     onMarkerClick={handleMarkerClick}
-                  />
+                    center={mapCenter}
+                />
                 </div>
                 <div className="p-4 bg-gray-50 text-sm text-gray-600 flex items-center justify-between">
                   <span>💡 Click on map markers to view loo details. Click the location button to center on your location.</span>
