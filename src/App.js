@@ -1,6 +1,3 @@
-import { useState, useEffect, useCallback, createContext, useContext, useRef } from "react";
-import "./App.css";
-import axios from "axios";
 import { Loader } from '@googlemaps/js-api-loader';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
@@ -169,20 +166,20 @@ const handleTermsDecline = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className=\"min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8\">
+      <div className=\"max-w-md w-full space-y-8\">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className=\"mt-6 text-center text-3xl font-extrabold text-gray-900\">
             🚽 Welcome to Loo Review
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className=\"mt-2 text-center text-sm text-gray-600\">
             {isRegister ? 'Create your account' : 'Sign in to your account'}
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-8 space-y-6">
+        <div className=\"bg-white rounded-lg shadow-md p-8 space-y-6\">
           {/* Auth Method Selector */}
-          <div className="flex rounded-md shadow-sm">
+          <div className=\"flex rounded-md shadow-sm\">
             <button
               onClick={() => setAuthMethod('email')}
               className={`flex-1 px-4 py-2 text-sm font-medium rounded-l-md border ${
@@ -206,99 +203,99 @@ const handleTermsDecline = () => {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className=\"bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded\">
               {error}
             </div>
           )}
 
           {authMethod === 'email' && (
-            <form onSubmit={handleEmailLogin} className="space-y-4">
+            <form onSubmit={handleEmailLogin} className=\"space-y-4\">
               {isRegister && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                  <label className=\"block text-sm font-medium text-gray-700\">Full Name</label>
                   <input
-                    type="text"
-                    name="full_name"
+                    type=\"text\"
+                    name=\"full_name\"
                     value={formData.full_name}
                     onChange={handleInputChange}
                     required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Your full name"
+                    className=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500\"
+                    placeholder=\"Your full name\"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <label className=\"block text-sm font-medium text-gray-700\">Email</label>
                 <input
-                  type="email"
-                  name="email"
+                  type=\"email\"
+                  name=\"email\"
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="your.email@example.com"
+                  className=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500\"
+                  placeholder=\"your.email@example.com\"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <label className=\"block text-sm font-medium text-gray-700\">Password</label>
                 <input
-                  type="password"
-                  name="password"
+                  type=\"password\"
+                  name=\"password\"
                   value={formData.password}
                   onChange={handleInputChange}
                   required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="••••••••"
+                  className=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500\"
+                  placeholder=\"••••••••\"
                 />
               </div>
 
               {isRegister && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+                  <label className=\"block text-sm font-medium text-gray-700\">Confirm Password</label>
                   <input
-                    type="password"
-                    name="confirmPassword"
+                    type=\"password\"
+                    name=\"confirmPassword\"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="••••••••"
+                    className=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500\"
+                    placeholder=\"••••••••\"
                   />
                 </div>
               )}
   {isRegister && (
-  <div className="space-y-3">
-    <div className="flex items-start space-x-2">
+  <div className=\"space-y-3\">
+    <div className=\"flex items-start space-x-2\">
       <input
-        type="checkbox"
-        id="accept_terms"
+        type=\"checkbox\"
+        id=\"accept_terms\"
         checked={formData.accept_terms}
         onChange={(e) => setFormData(prev => ({ ...prev, accept_terms: e.target.checked }))}
         required
-        className="mt-1"
+        className=\"mt-1\"
       />
-      <label htmlFor="accept_terms" className="text-sm text-gray-700">
+      <label htmlFor=\"accept_terms\" className=\"text-sm text-gray-700\">
         I agree to the{' '}
         <button
-          type="button"
+          type=\"button\"
           onClick={fetchTerms}
-          className="text-blue-600 hover:text-blue-800 underline"
+          className=\"text-blue-600 hover:text-blue-800 underline\"
         >
           Terms of Service
         </button>
       </label>
     </div>
     {!formData.accept_terms && isRegister && (
-      <p className="text-xs text-red-600">You must accept the Terms of Service to create an account</p>
+      <p className=\"text-xs text-red-600\">You must accept the Terms of Service to create an account</p>
     )}
   </div>
 )}
               <button
-                type="submit"
+                type=\"submit\"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400"
+                className=\"w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400\"
               >
                 {loading ? 'Processing...' : (isRegister ? 'Create Account' : 'Sign In')}
               </button>
@@ -306,32 +303,32 @@ const handleTermsDecline = () => {
           )}
 
           {authMethod === 'google' && (
-            <div className="space-y-4">
-              <div className="w-full">
+            <div className=\"space-y-4\">
+              <div className=\"w-full\">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={() => setError('Google Login Failed')}
-                  text={isRegister ? "signup_with" : "signin_with"}
-                  width="320"
-                  theme="outline"
-                  size="large"
+                  text={isRegister ? \"signup_with\" : \"signin_with\"}
+                  width=\"320\"
+                  theme=\"outline\"
+                  size=\"large\"
                 />
               </div>
             </div>
           )}
 
-          <div className="text-center">
+          <div className=\"text-center\">
             <button
               onClick={() => {
                 setIsRegister(!isRegister);
                 setError('');
                 setFormData({ email: '', password: '', full_name: '', confirmPassword: '', accept_terms: false });
               }}
-              className="text-blue-600 hover:text-blue-500 text-sm"
+              className=\"text-blue-600 hover:text-blue-500 text-sm\"
             >
               {isRegister 
                 ? 'Already have an account? Sign in' 
-                : "Don't have an account? Sign up"}
+                : \"Don't have an account? Sign up\"}
             </button>
           </div>
         </div>
@@ -352,25 +349,25 @@ const TermsModal = ({ isOpen, onAccept, onDecline, termsText }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-hidden">
-        <div className="p-6">
-          <h2 className="text-xl font-bold mb-4">Terms of Service</h2>
+    <div className=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4\">
+      <div className=\"bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-hidden\">
+        <div className=\"p-6\">
+          <h2 className=\"text-xl font-bold mb-4\">Terms of Service</h2>
           
-          <div className="max-h-64 overflow-y-auto mb-6 p-4 bg-gray-50 rounded border text-sm">
-            <pre className="whitespace-pre-wrap font-sans">{termsText}</pre>
+          <div className=\"max-h-64 overflow-y-auto mb-6 p-4 bg-gray-50 rounded border text-sm\">
+            <pre className=\"whitespace-pre-wrap font-sans\">{termsText}</pre>
           </div>
           
-          <div className="flex space-x-4">
+          <div className=\"flex space-x-4\">
             <button
               onClick={onDecline}
-              className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400"
+              className=\"flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400\"
             >
               Decline
             </button>
             <button
               onClick={onAccept}
-              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+              className=\"flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700\"
             >
               Accept Terms
             </button>
@@ -381,19 +378,150 @@ const TermsModal = ({ isOpen, onAccept, onDecline, termsText }) => {
   );
 };
 
+// Report Content Modal
+const ReportModal = ({ isOpen, onClose, contentType, contentId, onSuccess }) => {
+  const [reason, setReason] = useState('');
+  const [description, setDescription] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const reportReasons = [
+    'Inappropriate Content',
+    'Harassment or Bullying',
+    'Spam',
+    'False Information',
+    'Explicit Material',
+    'Other'
+  ];
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!reason) {
+      alert('Please select a reason for reporting');
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const response = await axios.post(`${API}/reports`, {
+        content_type: contentType,
+        content_id: contentId,
+        reason: reason,
+        description: description.trim() || null
+      });
+
+      alert('Report submitted successfully. We will review it within 24 hours.');
+      onSuccess && onSuccess();
+      onClose();
+      
+      // Reset form
+      setReason('');
+      setDescription('');
+    } catch (error) {
+      console.error('Failed to submit report:', error);
+      alert('Failed to submit report. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    setReason('');
+    setDescription('');
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4\">
+      <div className=\"bg-white rounded-lg max-w-md w-full\">
+        <div className=\"p-6\">
+          <div className=\"flex justify-between items-center mb-4\">
+            <h2 className=\"text-xl font-bold\">Report Content</h2>
+            <button
+              onClick={handleClose}
+              className=\"text-gray-500 hover:text-gray-700 text-2xl\"
+            >
+              ×
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className=\"space-y-4\">
+            <div>
+              <label className=\"block text-sm font-medium text-gray-700 mb-2\">
+                Reason for reporting *
+              </label>
+              <select
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                required
+                className=\"w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500\"
+              >
+                <option value=\"\">Select a reason...</option>
+                {reportReasons.map((reasonOption) => (
+                  <option key={reasonOption} value={reasonOption}>
+                    {reasonOption}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className=\"block text-sm font-medium text-gray-700 mb-2\">
+                Additional details (optional)
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder=\"Provide any additional details about why you're reporting this content...\"
+                rows=\"3\"
+                className=\"w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500\"
+              />
+            </div>
+
+            <div className=\"flex space-x-3\">
+              <button
+                type=\"button\"
+                onClick={handleClose}
+                className=\"flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400\"
+                disabled={submitting}
+              >
+                Cancel
+              </button>
+              <button
+                type=\"submit\"
+                disabled={submitting}
+                className=\"flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 disabled:bg-gray-400\"
+              >
+                {submitting ? 'Submitting...' : 'Submit Report'}
+              </button>
+            </div>
+          </form>
+
+          <div className=\"mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800\">
+            <strong>Note:</strong> All reports are reviewed within 24 hours. False reports may result in account penalties.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Categorical Rating Component
 const CategoryRating = ({ category, rating, onRatingChange, icon }) => {
   return (
-    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-      <div className="flex items-center space-x-2">
-        <span className="text-lg">{icon}</span>
-        <span className="font-medium text-gray-700 capitalize">{category}</span>
+    <div className=\"flex items-center justify-between p-3 bg-gray-50 rounded-lg\">
+      <div className=\"flex items-center space-x-2\">
+        <span className=\"text-lg\">{icon}</span>
+        <span className=\"font-medium text-gray-700 capitalize\">{category}</span>
       </div>
-      <div className="flex space-x-1">
+      <div className=\"flex space-x-1\">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
-            type="button"
+            type=\"button\"
             className={`text-xl ${
               star <= rating ? 'text-yellow-400' : 'text-gray-300'
             } hover:text-yellow-500 cursor-pointer transition-colors`}
@@ -428,8 +556,8 @@ const OverallRating = ({
 
   if (!showBreakdown) {
     return (
-      <div className="flex items-center space-x-2">
-        <div className="flex space-x-1">
+      <div className=\"flex items-center space-x-2\">
+        <div className=\"flex space-x-1\">
           {[1, 2, 3, 4, 5].map((star) => (
             <span
               key={star}
@@ -441,7 +569,7 @@ const OverallRating = ({
             </span>
           ))}
         </div>
-        <span className="text-sm font-medium text-gray-600">
+        <span className=\"text-sm font-medium text-gray-600\">
           {overallRating}/5
         </span>
       </div>
@@ -449,11 +577,11 @@ const OverallRating = ({
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="font-medium text-gray-800">Overall Rating</span>
-        <div className="flex items-center space-x-2">
-          <div className="flex space-x-1">
+    <div className=\"space-y-2\">
+      <div className=\"flex items-center justify-between\">
+        <span className=\"font-medium text-gray-800\">Overall Rating</span>
+        <div className=\"flex items-center space-x-2\">
+          <div className=\"flex space-x-1\">
             {[1, 2, 3, 4, 5].map((star) => (
               <span
                 key={star}
@@ -465,20 +593,20 @@ const OverallRating = ({
               </span>
             ))}
           </div>
-          <span className="text-sm font-medium text-gray-600">
+          <span className=\"text-sm font-medium text-gray-600\">
             {overallRating}/5
           </span>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 gap-1 text-sm">
+      <div className=\"grid grid-cols-1 gap-1 text-sm\">
         {categories.map((category) => (
-          <div key={category.name} className="flex items-center justify-between">
-            <div className="flex items-center space-x-1">
+          <div key={category.name} className=\"flex items-center justify-between\">
+            <div className=\"flex items-center space-x-1\">
               <span>{category.icon}</span>
-              <span className="capitalize text-gray-600">{category.name}</span>
+              <span className=\"capitalize text-gray-600\">{category.name}</span>
             </div>
-            <div className="flex space-x-1">
+            <div className=\"flex space-x-1\">
               {[1, 2, 3, 4, 5].map((star) => (
                 <span
                   key={star}
@@ -557,10 +685,10 @@ const getCurrentLocation = () => {
           title: 'Your Current Location',
           icon: {
             url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-              <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="15" cy="15" r="12" fill="#4285F4" stroke="white" stroke-width="3"/>
-                <circle cx="15" cy="15" r="6" fill="white"/>
-                <circle cx="15" cy="15" r="3" fill="#4285F4"/>
+              <svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">
+                <circle cx=\"15\" cy=\"15\" r=\"12\" fill=\"#4285F4\" stroke=\"white\" stroke-width=\"3\"/>
+                <circle cx=\"15\" cy=\"15\" r=\"6\" fill=\"white\"/>
+                <circle cx=\"15\" cy=\"15\" r=\"3\" fill=\"#4285F4\"/>
               </svg>
             `),
             scaledSize: new window.google.maps.Size(30, 30),
@@ -657,10 +785,10 @@ const getCurrentLocation = () => {
           title: bathroom.location,
           icon: {
             url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-              <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 3C10.05 3 6 7.05 6 12c0 7.5 9 15 9 15s9-7.5 9-15c0-4.95-4.05-9-9-9z" fill="#4285F4"/>
-                <circle cx="15" cy="12" r="3.5" fill="white"/>
-                <text x="15" y="14" text-anchor="middle" fill="#4285F4" font-size="8" font-weight="bold">${Math.round(bathroom.overall_rating)}</text>
+              <svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">
+                <path d=\"M15 3C10.05 3 6 7.05 6 12c0 7.5 9 15 9 15s9-7.5 9-15c0-4.95-4.05-9-9-9z\" fill=\"#4285F4\"/>
+                <circle cx=\"15\" cy=\"12\" r=\"3.5\" fill=\"white\"/>
+                <text x=\"15\" y=\"14\" text-anchor=\"middle\" fill=\"#4285F4\" font-size=\"8\" font-weight=\"bold\">${Math.round(bathroom.overall_rating)}</text>
               </svg>
             `),
             scaledSize: new window.google.maps.Size(30, 30),
@@ -677,25 +805,25 @@ const getCurrentLocation = () => {
   }, [map, bathrooms, isLoaded, handleMarkerClick]);
 
   return (
-    <div className="relative w-full h-full">
-      <div id="map" className="w-full h-full rounded-lg shadow-lg" />
+    <div className=\"relative w-full h-full\">
+      <div id=\"map\" className=\"w-full h-full rounded-lg shadow-lg\" />
       
       {/* Current Location Button */}
       <button
         onClick={getCurrentLocation}
         disabled={gettingLocation}
-        className="absolute top-4 right-4 bg-white hover:bg-gray-50 disabled:bg-gray-100 border border-gray-300 rounded-lg shadow-md p-3 flex items-center justify-center transition-colors"
-        title="Go to my location"
+        className=\"absolute top-4 right-4 bg-white hover:bg-gray-50 disabled:bg-gray-100 border border-gray-300 rounded-lg shadow-md p-3 flex items-center justify-center transition-colors\"
+        title=\"Go to my location\"
       >
         {gettingLocation ? (
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+          <div className=\"animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600\"></div>
         ) : (
           <svg 
-            className="w-5 h-5 text-gray-700" 
-            fill="currentColor" 
-            viewBox="0 0 20 20"
+            className=\"w-5 h-5 text-gray-700\" 
+            fill=\"currentColor\" 
+            viewBox=\"0 0 20 20\"
           >
-            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+            <path fillRule=\"evenodd\" d=\"M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z\" clipRule=\"evenodd\" />
           </svg>
         )}
       </button>
@@ -801,15 +929,15 @@ const MobileCamera = ({ onImageCapture, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-sm w-full">
-        <div className="p-6">
-          <h3 className="text-lg font-bold mb-4">Add Photo</h3>
+    <div className=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4\">
+      <div className=\"bg-white rounded-lg max-w-sm w-full\">
+        <div className=\"p-6\">
+          <h3 className=\"text-lg font-bold mb-4\">Add Photo</h3>
           
-          <div className="space-y-3">
+          <div className=\"space-y-3\">
             <button
               onClick={captureImage}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 flex items-center justify-center space-x-2"
+              className=\"w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 flex items-center justify-center space-x-2\"
             >
               <span>📷</span>
               <span>Take Photo</span>
@@ -817,7 +945,7 @@ const MobileCamera = ({ onImageCapture, onClose }) => {
             
             <button
               onClick={selectFromGallery}
-              className="w-full bg-gray-600 text-white py-3 px-4 rounded-md hover:bg-gray-700 flex items-center justify-center space-x-2"
+              className=\"w-full bg-gray-600 text-white py-3 px-4 rounded-md hover:bg-gray-700 flex items-center justify-center space-x-2\"
             >
               <span>🖼️</span>
               <span>Choose from Gallery</span>
@@ -825,7 +953,7 @@ const MobileCamera = ({ onImageCapture, onClose }) => {
             
             <button
               onClick={onClose}
-              className="w-full bg-gray-300 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-400"
+              className=\"w-full bg-gray-300 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-400\"
             >
               Cancel
             </button>
@@ -864,14 +992,14 @@ const MobileGeolocation = ({ onLocationFound, onError }) => {
 
   return (
     <button
-      type="button"
+      type=\"button\"
       onClick={getCurrentLocation}
       disabled={loading}
-      className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:bg-gray-400 flex items-center justify-center space-x-2"
+      className=\"w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:bg-gray-400 flex items-center justify-center space-x-2\"
     >
       {loading ? (
         <>
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          <div className=\"animate-spin rounded-full h-4 w-4 border-b-2 border-white\"></div>
           <span>Getting Location...</span>
         </>
       ) : (
@@ -958,13 +1086,13 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
   return (
     <input
       ref={inputRef}
-      type="text"
+      type=\"text\"
       value={value}
       onChange={handleInputChange}
       onFocus={() => { isManualInput.current = false; }}
-      placeholder="Search for a place... (e.g., Starbucks, McDonald's, Mall)"
+      placeholder=\"Search for a place... (e.g., Starbucks, McDonald's, Mall)\"
       required
-      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className=\"w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500\"
     />
   );
 };
@@ -1010,10 +1138,10 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
             title: 'Your Current Location',
             icon: {
               url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12.5" cy="12.5" r="10" fill="#34D399" stroke="white" stroke-width="2"/>
-                  <circle cx="12.5" cy="12.5" r="5" fill="white"/>
-                  <circle cx="12.5" cy="12.5" r="2" fill="#34D399"/>
+                <svg width=\"25\" height=\"25\" viewBox=\"0 0 25 25\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">
+                  <circle cx=\"12.5\" cy=\"12.5\" r=\"10\" fill=\"#34D399\" stroke=\"white\" stroke-width=\"2\"/>
+                  <circle cx=\"12.5\" cy=\"12.5\" r=\"5\" fill=\"white\"/>
+                  <circle cx=\"12.5\" cy=\"12.5\" r=\"2\" fill=\"#34D399\"/>
                 </svg>
               `),
               scaledSize: new window.google.maps.Size(25, 25),
@@ -1079,9 +1207,9 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
             title: 'Selected Location',
             icon: {
               url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12.5 2C8.36 2 5 5.36 5 9.5c0 6.25 7.5 12.5 7.5 12.5s7.5-6.25 7.5-12.5C20 5.36 16.64 2 12.5 2z" fill="#EF4444"/>
-                  <circle cx="12.5" cy="9.5" r="3" fill="white"/>
+                <svg width=\"25\" height=\"25\" viewBox=\"0 0 25 25\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">
+                  <path d=\"M12.5 2C8.36 2 5 5.36 5 9.5c0 6.25 7.5 12.5 7.5 12.5s7.5-6.25 7.5-12.5C20 5.36 16.64 2 12.5 2z\" fill=\"#EF4444\"/>
+                  <circle cx=\"12.5\" cy=\"9.5\" r=\"3\" fill=\"white\"/>
                 </svg>
               `),
               scaledSize: new window.google.maps.Size(25, 25),
@@ -1117,9 +1245,9 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
         title: 'Selected Location',
         icon: {
           url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12.5 2C8.36 2 5 5.36 5 9.5c0 6.25 7.5 12.5 7.5 12.5s7.5-6.25 7.5-12.5C20 5.36 16.64 2 12.5 2z" fill="#EF4444"/>
-              <circle cx="12.5" cy="9.5" r="3" fill="white"/>
+            <svg width=\"25\" height=\"25\" viewBox=\"0 0 25 25\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">
+              <path d=\"M12.5 2C8.36 2 5 5.36 5 9.5c0 6.25 7.5 12.5 7.5 12.5s7.5-6.25 7.5-12.5C20 5.36 16.64 2 12.5 2z\" fill=\"#EF4444\"/>
+              <circle cx=\"12.5\" cy=\"9.5\" r=\"3\" fill=\"white\"/>
             </svg>
           `),
           scaledSize: new window.google.maps.Size(25, 25),
@@ -1132,18 +1260,18 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
   }, [map, selectedLocation]);
 
   return (
-    <div className="w-full">
-      <div className="mb-3 flex justify-between items-center">
-        <span className="text-sm font-medium text-gray-700">Click on map to select location</span>
+    <div className=\"w-full\">
+      <div className=\"mb-3 flex justify-between items-center\">
+        <span className=\"text-sm font-medium text-gray-700\">Click on map to select location</span>
         <button
-          type="button"
+          type=\"button\"
           onClick={getCurrentLocation}
           disabled={gettingLocation}
-          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-1 rounded text-sm flex items-center space-x-1"
+          className=\"bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-1 rounded text-sm flex items-center space-x-1\"
         >
           {gettingLocation ? (
             <>
-              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+              <div className=\"animate-spin rounded-full h-3 w-3 border-b-2 border-white\"></div>
               <span>Getting...</span>
             </>
           ) : (
@@ -1155,12 +1283,12 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
         </button>
       </div>
       
-      <div className="w-full h-64 border rounded-lg overflow-hidden">
-        <div id="location-map" className="w-full h-full" />
+      <div className=\"w-full h-64 border rounded-lg overflow-hidden\">
+        <div id=\"location-map\" className=\"w-full h-full\" />
       </div>
       
       {selectedLocation && (
-        <div className="mt-2 p-2 bg-gray-50 text-sm text-gray-600 rounded">
+        <div className=\"mt-2 p-2 bg-gray-50 text-sm text-gray-600 rounded\">
           📍 Selected: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
         </div>
       )}
@@ -1341,29 +1469,29 @@ const UploadForm = ({ onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-8">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Rate a Loo</h2>
+    <form onSubmit={handleSubmit} className=\"bg-white rounded-lg shadow-md p-6 mb-8\">
+      <div className=\"flex justify-between items-center mb-6\">
+        <h2 className=\"text-2xl font-bold text-gray-800\">Rate a Loo</h2>
         {user && (
-          <div className="text-sm text-gray-600">
-            Signed in as <span className="font-medium">{user.full_name}</span>
+          <div className=\"text-sm text-gray-600\">
+            Signed in as <span className=\"font-medium\">{user.full_name}</span>
           </div>
         )}
       </div>
       
       {/* Image Upload */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className=\"mb-6\">
+        <label className=\"block text-sm font-medium text-gray-700 mb-2\">
           Upload Photo *
         </label>
         
         {isNative ? (
           // Mobile-optimized upload
-          <div className="space-y-3">
+          <div className=\"space-y-3\">
             <button
-              type="button"
+              type=\"button\"
               onClick={() => setShowMobileCamera(true)}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 flex items-center justify-center space-x-2"
+              className=\"w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 flex items-center justify-center space-x-2\"
             >
               <span>📷</span>
               <span>Add Photo</span>
@@ -1372,68 +1500,68 @@ const UploadForm = ({ onSuccess }) => {
         ) : (
           // Web file input
           <input
-            type="file"
-            accept="image/*"
+            type=\"file\"
+            accept=\"image/*\"
             onChange={handleImageChange}
             required
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            className=\"block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100\"
           />
         )}
         
         {previewUrl && (
-          <div className="mt-4">
+          <div className=\"mt-4\">
             <img 
               src={previewUrl} 
-              alt="Preview" 
-              className="max-w-full h-48 object-cover rounded-lg"
+              alt=\"Preview\" 
+              className=\"max-w-full h-48 object-cover rounded-lg\"
             />
           </div>
         )}
       </div>
 
       {/* Categorical Ratings */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-4">
+      <div className=\"mb-6\">
+        <label className=\"block text-sm font-medium text-gray-700 mb-4\">
           Rate Each Category * 
-          <span className="text-xs text-gray-500 ml-2">(All categories required)</span>
+          <span className=\"text-xs text-gray-500 ml-2\">(All categories required)</span>
         </label>
-        <div className="space-y-3">
+        <div className=\"space-y-3\">
           <CategoryRating
-            category="sink"
+            category=\"sink\"
             rating={formData.sinkRating}
             onRatingChange={(rating) => setFormData(prev => ({ ...prev, sinkRating: rating }))}
-            icon="🚰"
+            icon=\"🚰\"
           />
           <CategoryRating
-            category="floor"
+            category=\"floor\"
             rating={formData.floorRating}
             onRatingChange={(rating) => setFormData(prev => ({ ...prev, floorRating: rating }))}
-            icon="🧽"
+            icon=\"🧽\"
           />
           <CategoryRating
-            category="toilet"
+            category=\"toilet\"
             rating={formData.toiletRating}
             onRatingChange={(rating) => setFormData(prev => ({ ...prev, toiletRating: rating }))}
-            icon="🚽"
+            icon=\"🚽\"
           />
           <CategoryRating
-            category="smell"
+            category=\"smell\"
             rating={formData.smellRating}
             onRatingChange={(rating) => setFormData(prev => ({ ...prev, smellRating: rating }))}
-            icon="👃"
+            icon=\"👃\"
           />
           <CategoryRating
-            category="niceness"
+            category=\"niceness\"
             rating={formData.nicenessRating}
             onRatingChange={(rating) => setFormData(prev => ({ ...prev, nicenessRating: rating }))}
-            icon="✨"
+            icon=\"✨\"
           />
         </div>
         
         {/* Overall Rating Preview */}
         {(formData.sinkRating > 0 || formData.floorRating > 0 || formData.toiletRating > 0 || 
           formData.smellRating > 0 || formData.nicenessRating > 0) && (
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+          <div className=\"mt-4 p-3 bg-blue-50 rounded-lg\">
             <OverallRating
               sinkRating={formData.sinkRating}
               floorRating={formData.floorRating}
@@ -1449,10 +1577,10 @@ const UploadForm = ({ onSuccess }) => {
       </div>
 
       {/* Location with Autocomplete */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className=\"mb-6\">
+        <label className=\"block text-sm font-medium text-gray-700 mb-2\">
           Location * 
-          <span className="text-xs text-gray-500 ml-2">(Search for businesses, addresses, landmarks)</span>
+          <span className=\"text-xs text-gray-500 ml-2\">(Search for businesses, addresses, landmarks)</span>
         </label>
         <LocationAutocomplete
           value={formData.location}
@@ -1467,22 +1595,22 @@ const UploadForm = ({ onSuccess }) => {
           selectedLocation={formData.coordinates}
         />
         {formData.coordinates && (
-          <div className="mt-2 text-sm text-green-600 bg-green-50 p-2 rounded">
+          <div className=\"mt-2 text-sm text-green-600 bg-green-50 p-2 rounded\">
             ✓ Location found with coordinates: {formData.coordinates.lat.toFixed(6)}, {formData.coordinates.lng.toFixed(6)}
           </div>
         )}
         
         {formData.location && !formData.coordinates && (
-          <div className="mt-2 text-sm text-blue-600 bg-blue-50 p-2 rounded">
-            📍 Manual location text entered: "{formData.location}"
+          <div className=\"mt-2 text-sm text-blue-600 bg-blue-50 p-2 rounded\">
+            📍 Manual location text entered: \"{formData.location}\"
             <br />
-            <span className="text-xs">Coordinates will be geocoded automatically or can be set manually below</span>
+            <span className=\"text-xs\">Coordinates will be geocoded automatically or can be set manually below</span>
           </div>
         )}
         
         {/* Mobile Geolocation */}
         {isNative && (
-          <div className="mt-3">
+          <div className=\"mt-3\">
             <MobileGeolocation 
               onLocationFound={handleLocationFound}
               onError={handleLocationError}
@@ -1492,23 +1620,23 @@ const UploadForm = ({ onSuccess }) => {
       </div>
 
       {/* Enhanced Location Map (Auto-show when location selected) */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-gray-700">
+      <div className=\"mb-6\">
+        <div className=\"flex items-center justify-between mb-2\">
+          <label className=\"block text-sm font-medium text-gray-700\">
             Location Map {formData.coordinates ? '' : '(optional)'}
           </label>
           <button
-            type="button"
+            type=\"button\"
             onClick={() => setShowLocationSelector(!showLocationSelector)}
-            className="text-blue-600 hover:text-blue-800 text-sm"
+            className=\"text-blue-600 hover:text-blue-800 text-sm\"
           >
             {showLocationSelector ? 'Hide Map' : 'Show Map'}
           </button>
         </div>
-        <p className="text-xs text-gray-500 mb-2">
+        <p className=\"text-xs text-gray-500 mb-2\">
           {formData.coordinates 
             ? 'Your selected location is shown on the map below' 
-            : 'Click on the map to manually select coordinates or use "My Location" button'}
+            : 'Click on the map to manually select coordinates or use \"My Location\" button'}
         </p>
         {showLocationSelector && (
           <LocationSelector 
@@ -1517,12 +1645,12 @@ const UploadForm = ({ onSuccess }) => {
           />
         )}
         {formData.coordinates && !showLocationSelector && (
-          <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+          <div className=\"text-sm text-gray-600 bg-gray-50 p-2 rounded\">
             📍 Coordinates: {formData.coordinates.lat.toFixed(6)}, {formData.coordinates.lng.toFixed(6)}
             <button
-              type="button"
+              type=\"button\"
               onClick={() => setShowLocationSelector(true)}
-              className="ml-2 text-blue-600 hover:text-blue-800 text-xs underline"
+              className=\"ml-2 text-blue-600 hover:text-blue-800 text-xs underline\"
             >
               View on Map
             </button>
@@ -1531,23 +1659,23 @@ const UploadForm = ({ onSuccess }) => {
       </div>
 
       {/* Comments */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className=\"mb-6\">
+        <label className=\"block text-sm font-medium text-gray-700 mb-2\">
           Comments (optional)
         </label>
         <textarea
           value={formData.comments}
           onChange={(e) => setFormData(prev => ({ ...prev, comments: e.target.value }))}
-          placeholder="Share your thoughts about this loo..."
-          rows="3"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder=\"Share your thoughts about this loo...\"
+          rows=\"3\"
+          className=\"w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500\"
         />
       </div>
 
       <button
-        type="submit"
+        type=\"submit\"
         disabled={uploading}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+        className=\"w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium\"
       >
         {uploading ? 'Uploading...' : 'Submit Rating'}
       </button>
@@ -1564,7 +1692,7 @@ const UploadForm = ({ onSuccess }) => {
 };
 
 // Bathroom Card Component
-const BathroomCard = ({ bathroom, onClick }) => {
+const BathroomCard = ({ bathroom, onClick, setReportModalOpen, setReportContent }) => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -1577,23 +1705,23 @@ const BathroomCard = ({ bathroom, onClick }) => {
 
   return (
     <div 
-      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      className=\"bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow\"
       onClick={() => onClick && onClick(bathroom)}
     >
       <img
         src={`${BACKEND_URL}${bathroom.image_url}`}
-        alt="Loo"
-        className="w-full h-48 object-cover"
+        alt=\"Loo\"
+        className=\"w-full h-48 object-cover\"
         onError={(e) => {
           e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD4KICA8L3N2Zz4K';
         }}
       />
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-semibold text-gray-800 truncate flex-1">
+      <div className=\"p-4\">
+        <div className=\"flex justify-between items-start mb-2\">
+          <h3 className=\"text-lg font-semibold text-gray-800 truncate flex-1\">
             {bathroom.location}
           </h3>
-          <div className="ml-2">
+          <div className=\"ml-2\">
             <OverallRating
               sinkRating={bathroom.sink_rating}
               floorRating={bathroom.floor_rating}
@@ -1608,60 +1736,74 @@ const BathroomCard = ({ bathroom, onClick }) => {
         </div>
         
         {bathroom.user_name && (
-          <div className="flex items-center text-xs text-gray-500 mb-2">
-            <span className="mr-1">👤</span>
+          <div className=\"flex items-center text-xs text-gray-500 mb-2\">
+            <span className=\"mr-1\">👤</span>
             <span>by {bathroom.user_name}</span>
           </div>
         )}
         
         {bathroom.latitude && bathroom.longitude && (
-          <div className="flex items-center text-xs text-blue-600 mb-2">
-            <span className="mr-1">📍</span>
+          <div className=\"flex items-center text-xs text-blue-600 mb-2\">
+            <span className=\"mr-1\">📍</span>
             <span>Mapped Location</span>
           </div>
         )}
         
         {bathroom.comments && (
-          <p className="text-gray-600 text-sm mb-3 line-clamp-3">
+          <p className=\"text-gray-600 text-sm mb-3 line-clamp-3\">
             {bathroom.comments}
           </p>
         )}
         
-        <p className="text-xs text-gray-500">
-          {formatDate(bathroom.timestamp)}
-        </p>
+        <div className=\"flex justify-between items-center\">
+          <p className=\"text-xs text-gray-500\">
+            {formatDate(bathroom.timestamp)}
+          </p>
+          
+          {/* Report Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click
+              setReportModalOpen(true);
+              setReportContent({ type: 'bathroom', id: bathroom.id });
+            }}
+            className=\"text-xs text-red-600 hover:text-red-800 underline\"
+          >
+            🚩 Report
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
 // Bathroom Detail Modal
-const BathroomModal = ({ bathroom, isOpen, onClose }) => {
+const BathroomModal = ({ bathroom, isOpen, onClose, setReportModalOpen, setReportContent }) => {
   if (!isOpen || !bathroom) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-96 overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">{bathroom.location}</h2>
+    <div className=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4\">
+      <div className=\"bg-white rounded-lg max-w-md w-full max-h-96 overflow-y-auto\">
+        <div className=\"p-6\">
+          <div className=\"flex justify-between items-center mb-4\">
+            <h2 className=\"text-xl font-bold\">{bathroom.location}</h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 text-2xl"
+              className=\"text-gray-500 hover:text-gray-700 text-2xl\"
             >
               ×
             </button>
           </div>
           
-          <div className="mb-4">
+          <div className=\"mb-4\">
             <img
               src={`${BACKEND_URL}${bathroom.image_url}`}
-              alt="Loo"
-              className="w-full h-48 object-cover rounded-lg"
+              alt=\"Loo\"
+              className=\"w-full h-48 object-cover rounded-lg\"
             />
           </div>
           
-          <div className="space-y-3">
+          <div className=\"space-y-3\">
             <div>
               <OverallRating
                 sinkRating={bathroom.sink_rating}
@@ -1676,16 +1818,28 @@ const BathroomModal = ({ bathroom, isOpen, onClose }) => {
             </div>
 
             {bathroom.user_name && (
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Reviewed by:</span>
-                <span className="text-sm text-gray-600">{bathroom.user_name}</span>
+              <div className=\"flex items-center justify-between\">
+                <span className=\"font-medium\">Reviewed by:</span>
+                <div className=\"flex items-center space-x-2\">
+                  <span className=\"text-sm text-gray-600\">{bathroom.user_name}</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setReportModalOpen(true);
+                      setReportContent({ type: 'user', id: bathroom.user_id });
+                    }}
+                    className=\"text-xs text-red-600 hover:text-red-800 underline\"
+                  >
+                    Report User
+                  </button>
+                </div>
               </div>
             )}
             
             {bathroom.latitude && bathroom.longitude && (
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Coordinates:</span>
-                <span className="text-sm text-gray-600">
+              <div className=\"flex items-center justify-between\">
+                <span className=\"font-medium\">Coordinates:</span>
+                <span className=\"text-sm text-gray-600\">
                   {bathroom.latitude.toFixed(6)}, {bathroom.longitude.toFixed(6)}
                 </span>
               </div>
@@ -1693,14 +1847,14 @@ const BathroomModal = ({ bathroom, isOpen, onClose }) => {
             
             {bathroom.comments && (
               <div>
-                <span className="font-medium">Comments:</span>
-                <p className="text-gray-600 text-sm mt-1">{bathroom.comments}</p>
+                <span className=\"font-medium\">Comments:</span>
+                <p className=\"text-gray-600 text-sm mt-1\">{bathroom.comments}</p>
               </div>
             )}
             
-            <div className="flex items-center justify-between pt-2 border-t">
-              <span className="font-medium">Added:</span>
-              <span className="text-sm text-gray-600">
+            <div className=\"flex items-center justify-between pt-2 border-t\">
+              <span className=\"font-medium\">Added:</span>
+              <span className=\"text-sm text-gray-600\">
                 {new Date(bathroom.timestamp).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'short',
@@ -1737,6 +1891,8 @@ function MainApp() {
   const [selectedBathroom, setSelectedBathroom] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [mapCenter, setMapCenter] = useState({ lat: 37.7749, lng: -122.4194 });
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportContent, setReportContent] = useState({ type: '', id: '' });
 
   const fetchBathrooms = async () => {
     try {
@@ -1776,10 +1932,10 @@ function MainApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
+      <div className=\"min-h-screen bg-gray-100 flex items-center justify-center\">
+        <div className=\"text-center\">
+          <div className=\"inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600\"></div>
+          <p className=\"mt-2 text-gray-600\">Loading...</p>
         </div>
       </div>
     );
@@ -1790,14 +1946,14 @@ function MainApp() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className=\"min-h-screen bg-gray-100\">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <h1 className="text-3xl font-bold text-gray-900">🚽 Loo Review</h1>
-            <div className="flex items-center space-x-4">
-              <nav className="flex space-x-4">
+      <header className=\"bg-white shadow-sm\">
+        <div className=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8\">
+          <div className=\"flex justify-between items-center py-6\">
+            <h1 className=\"text-3xl font-bold text-gray-900\">🚽 Loo Review</h1>
+            <div className=\"flex items-center space-x-4\">
+              <nav className=\"flex space-x-4\">
                 <button
                   onClick={() => setView('upload')}
                   className={`px-4 py-2 rounded-md font-medium ${
@@ -1829,11 +1985,11 @@ function MainApp() {
                   Map View ({bathroomsWithCoordinates.length})
                 </button>
               </nav>
-              <div className="flex items-center space-x-3">
-                <span className="text-sm text-gray-600">Hello, {user.full_name}</span>
+              <div className=\"flex items-center space-x-3\">
+                <span className=\"text-sm text-gray-600\">Hello, {user.full_name}</span>
                 <button
                   onClick={logout}
-                  className="text-sm text-gray-600 hover:text-gray-900"
+                  className=\"text-sm text-gray-600 hover:text-gray-900\"
                 >
                   Sign Out
                 </button>
@@ -1844,46 +2000,48 @@ function MainApp() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8\">
         {view === 'upload' && (
-          <div className="max-w-2xl mx-auto">
+          <div className=\"max-w-2xl mx-auto\">
             <UploadForm onSuccess={handleUploadSuccess} />
           </div>
         )}
 
         {view === 'gallery' && (
           <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">
+            <div className=\"flex justify-between items-center mb-6\">
+              <h2 className=\"text-2xl font-bold text-gray-800\">
                 Recent Loo Reviews
               </h2>
-              <p className="text-gray-600">
+              <p className=\"text-gray-600\">
                 {bathrooms.length} {bathrooms.length === 1 ? 'review' : 'reviews'}
               </p>
             </div>
 
             {dataLoading ? (
-              <div className="text-center py-12">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-2 text-gray-600">Loading loo reviews...</p>
+              <div className=\"text-center py-12\">
+                <div className=\"inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600\"></div>
+                <p className=\"mt-2 text-gray-600\">Loading loo reviews...</p>
               </div>
             ) : bathrooms.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg shadow">
-                <p className="text-gray-500 text-lg mb-4">No loo reviews yet!</p>
+              <div className=\"text-center py-12 bg-white rounded-lg shadow\">
+                <p className=\"text-gray-500 text-lg mb-4\">No loo reviews yet!</p>
                 <button
                   onClick={() => setView('upload')}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+                  className=\"bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700\"
                 >
                   Rate Your First Loo
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6\">
                 {bathrooms.map((bathroom) => (
                   <BathroomCard 
                     key={bathroom.id} 
                     bathroom={bathroom} 
                     onClick={handleGalleryItemClick}
+                    setReportModalOpen={setReportModalOpen}
+                    setReportContent={setReportContent}
                   />
                 ))}
               </div>
@@ -1893,47 +2051,47 @@ function MainApp() {
 
         {view === 'map' && (
           <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">
+            <div className=\"flex justify-between items-center mb-6\">
+              <h2 className=\"text-2xl font-bold text-gray-800\">
                 Loo Locations Map
               </h2>
-              <p className="text-gray-600">
+              <p className=\"text-gray-600\">
                 {bathroomsWithCoordinates.length} mapped locations
               </p>
             </div>
 
             {bathroomsWithCoordinates.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg shadow">
-                <p className="text-gray-500 text-lg mb-4">No mapped loo locations yet!</p>
-                <p className="text-gray-400 mb-4">Add location coordinates when rating loos to see them on the map.</p>
+              <div className=\"text-center py-12 bg-white rounded-lg shadow\">
+                <p className=\"text-gray-500 text-lg mb-4\">No mapped loo locations yet!</p>
+                <p className=\"text-gray-400 mb-4\">Add location coordinates when rating loos to see them on the map.</p>
                 <button
                   onClick={() => setView('upload')}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+                  className=\"bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700\"
                 >
                   Rate a Loo with Location
                 </button>
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div className="h-96 lg:h-[500px]">
+              <div className=\"bg-white rounded-lg shadow-lg overflow-hidden\">
+                <div className=\"h-96 lg:h-[500px]\">
                   <GoogleMap
                     bathrooms={bathroomsWithCoordinates}
                     onMarkerClick={handleMarkerClick}
                     center={mapCenter}
                 />
                 </div>
-                <div className="p-4 bg-gray-50 text-sm text-gray-600 flex items-center justify-between">
+                <div className=\"p-4 bg-gray-50 text-sm text-gray-600 flex items-center justify-between\">
                   <span>💡 Click on map markers to view loo details. Click the location button to center on your location.</span>
-                  <div className="flex items-center space-x-2 text-xs">
-                    <span className="flex items-center">
-                      <svg className="w-4 h-4 mr-1 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                  <div className=\"flex items-center space-x-2 text-xs\">
+                    <span className=\"flex items-center\">
+                      <svg className=\"w-4 h-4 mr-1 text-blue-600\" fill=\"currentColor\" viewBox=\"0 0 20 20\">
+                        <path fillRule=\"evenodd\" d=\"M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z\" clipRule=\"evenodd\" />
                       </svg>
                       Your Location
                     </span>
-                    <span className="flex items-center ml-4">
-                      <div className="w-4 h-4 mr-1 rounded-full bg-blue-600 flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">5</span>
+                    <span className=\"flex items-center ml-4\">
+                      <div className=\"w-4 h-4 mr-1 rounded-full bg-blue-600 flex items-center justify-center\">
+                        <span className=\"text-white text-xs font-bold\">5</span>
                       </div>
                       Bathroom Ratings
                     </span>
@@ -1950,9 +2108,23 @@ function MainApp() {
         bathroom={selectedBathroom}
         isOpen={showModal}
         onClose={() => setShowModal(false)}
+        setReportModalOpen={setReportModalOpen}
+        setReportContent={setReportContent}
+      />
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        contentType={reportContent.type}
+        contentId={reportContent.id}
+        onSuccess={() => {
+          console.log('Report submitted successfully');
+        }}
       />
     </div>
   );
 }
 
-export default App;
+export default App;"
+Observation: Create successful: /tmp/App_updated.js
