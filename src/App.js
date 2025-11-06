@@ -77,6 +77,88 @@ const AuthProvider = ({ children }) => {
   );
 };
 
+// Terms of Service Modal
+const TermsModal = ({ isOpen, onClose, onAccept }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-4">Terms of Service & Community Guidelines</h2>
+          
+          <div className="space-y-4 text-sm text-gray-700">
+            <section>
+              <h3 className="font-bold text-lg mb-2">Zero-Tolerance Policy</h3>
+              <p>
+                Loo Review maintains a <strong>zero-tolerance policy</strong> for objectionable content. 
+                We do not allow content that is offensive, inappropriate, harmful, or violates our community standards.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="font-bold text-lg mb-2">Prohibited Content</h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Offensive, abusive, or inappropriate language</li>
+                <li>Harassment, bullying, or threats</li>
+                <li>Discriminatory or hateful content</li>
+                <li>Sexually explicit or suggestive material</li>
+                <li>Violence or graphic content</li>
+                <li>Spam or misleading information</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="font-bold text-lg mb-2">Content Moderation</h3>
+              <p>
+                All user-submitted content is subject to review. Users can report inappropriate content, 
+                and we will investigate all reports within 24 hours. Violators may face:
+              </p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Content removal</li>
+                <li>Account warnings</li>
+                <li>Temporary or permanent account suspension</li>
+                <li>Legal action if necessary</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="font-bold text-lg mb-2">Reporting</h3>
+              <p>
+                If you encounter inappropriate content, please use the "Report" button available on all reviews. 
+                You can also block users whose content you find objectionable.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="font-bold text-lg mb-2">Your Agreement</h3>
+              <p>
+                By creating an account, you agree to follow these guidelines and understand that 
+                violations will result in enforcement actions.
+              </p>
+            </section>
+          </div>
+
+          <div className="flex space-x-3 mt-6">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onAccept}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              I Accept
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Login Component
 const Login = () => {
   const { login } = useAuth();
@@ -90,6 +172,8 @@ const Login = () => {
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showTerms, setShowTerms] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -105,6 +189,14 @@ const Login = () => {
     setError('');
 
     try {
+      // Check terms acceptance for registration
+      if (isRegister && !termsAccepted) {
+        setError('');
+        setLoading(false);
+        setShowTerms(true);
+        return;
+      }
+
       const endpoint = isRegister ? '/auth/register' : '/auth/login';
       const payload = isRegister 
         ? { email: formData.email, password: formData.password, full_name: formData.full_name }
@@ -123,6 +215,15 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTermsAccept = () => {
+    setTermsAccepted(true);
+    setShowTerms(false);
+    // Automatically submit the form after accepting terms
+    setTimeout(() => {
+      document.getElementById('login-form')?.requestSubmit();
+    }, 100);
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
@@ -186,7 +287,7 @@ const Login = () => {
           )}
 
           {authMethod === 'email' && (
-            <form onSubmit={handleEmailLogin} className="space-y-4">
+            <form id="login-form" onSubmit={handleEmailLogin} className="space-y-4">
               {isRegister && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Full Name</label>
@@ -273,6 +374,7 @@ const Login = () => {
               onClick={() => {
                 setIsRegister(!isRegister);
                 setError('');
+                setTermsAccepted(false);
                 setFormData({ email: '', password: '', full_name: '', confirmPassword: '' });
               }}
               className="text-blue-600 hover:text-blue-500 text-sm"
@@ -283,6 +385,13 @@ const Login = () => {
             </button>
           </div>
         </div>
+
+        {/* Terms of Service Modal */}
+        <TermsModal
+          isOpen={showTerms}
+          onClose={() => setShowTerms(false)}
+          onAccept={handleTermsAccept}
+        />
       </div>
     </div>
   );
@@ -703,6 +812,7 @@ const MobileCamera = ({ onImageCapture, onClose }) => {
     </div>
   );
 };
+
 // Mobile Geolocation Component
 const MobileGeolocation = ({ onLocationFound, onError }) => {
   const [loading, setLoading] = useState(false);
@@ -835,6 +945,7 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
     />
   );
 };
+
 // Location Selector Component (Manual Map Selection with My Location)
 const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
   const [map, setMap] = useState(null);
@@ -1094,6 +1205,23 @@ const UploadForm = ({ onSuccess }) => {
       console.log('Missing fields:', missingFields);
       alert(`Please fill in all required fields:\n\n${missingFields.map(field => `• ${field}`).join('\n')}\n\nCurrent form state:\n• Image: ${formData.image ? '✓ Selected' : '✗ Missing'}\n• Ratings: ${[formData.sinkRating, formData.floorRating, formData.toiletRating, formData.smellRating, formData.nicenessRating].filter(r => r > 0).length}/5 completed\n• Location: ${formData.location ? '✓ Filled' : '✗ Empty'}`);
       return;
+    }
+
+    // Basic profanity filter check
+    const profanityList = ['damn', 'hell', 'shit', 'fuck', 'ass', 'bitch', 'bastard'];
+    const checkProfanity = (text) => {
+      if (!text) return false;
+      const lowerText = text.toLowerCase();
+      return profanityList.some(word => {
+        const regex = new RegExp(`\\b${word}\\b`, 'i');
+        return regex.test(lowerText);
+      });
+    };
+
+    if (checkProfanity(formData.comments) || checkProfanity(formData.location)) {
+      if (!confirm('⚠️ Your submission may contain inappropriate language. Our community guidelines prohibit offensive content.\n\nSubmitting inappropriate content may result in content removal or account suspension.\n\nDo you want to review your submission?')) {
+        return;
+      }
     }
 
     setUploading(true);
@@ -1375,7 +1503,7 @@ const UploadForm = ({ onSuccess }) => {
 };
 
 // Bathroom Card Component
-const BathroomCard = ({ bathroom, onClick }) => {
+const BathroomCard = ({ bathroom, onClick, onReport }) => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -1386,11 +1514,27 @@ const BathroomCard = ({ bathroom, onClick }) => {
     });
   };
 
+  const handleReportClick = (e) => {
+    e.stopPropagation(); // Prevent card click
+    if (onReport) {
+      onReport(bathroom);
+    }
+  };
+
   return (
     <div 
-      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow relative"
       onClick={() => onClick && onClick(bathroom)}
     >
+      {/* Report Button */}
+      <button
+        onClick={handleReportClick}
+        className="absolute top-2 right-2 bg-white bg-opacity-90 hover:bg-opacity-100 text-red-600 px-2 py-1 rounded text-xs font-medium shadow-md z-10"
+        title="Report this content"
+      >
+        🚩 Report
+      </button>
+
       <img
         src={`${BACKEND_URL}${bathroom.image_url}`}
         alt="Loo"
@@ -1447,8 +1591,10 @@ const BathroomCard = ({ bathroom, onClick }) => {
 };
 
 // Bathroom Detail Modal
-const BathroomModal = ({ bathroom, isOpen, onClose }) => {
+const BathroomModal = ({ bathroom, isOpen, onClose, onReportContent, onReportUser, onBlockUser, currentUserId }) => {
   if (!isOpen || !bathroom) return null;
+
+  const isOwnReview = currentUserId === bathroom.user_id;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1521,6 +1667,42 @@ const BathroomModal = ({ bathroom, isOpen, onClose }) => {
                 })}
               </span>
             </div>
+
+            {/* Action Buttons */}
+            {!isOwnReview && (
+              <div className="pt-4 border-t space-y-2">
+                <button
+                  onClick={() => {
+                    onReportContent(bathroom);
+                    onClose();
+                  }}
+                  className="w-full px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 text-sm font-medium"
+                >
+                  🚩 Report This Review
+                </button>
+                
+                {bathroom.user_id && (
+                  <>
+                    <button
+                      onClick={() => {
+                        onReportUser(bathroom);
+                        onClose();
+                      }}
+                      className="w-full px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 text-sm font-medium"
+                    >
+                      ⚠️ Report User
+                    </button>
+                    
+                    <button
+                      onClick={() => onBlockUser(bathroom.user_id, bathroom.user_name)}
+                      className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium"
+                    >
+                      🚫 Block User
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1539,6 +1721,123 @@ function App() {
   );
 }
 
+// Report Modal Component
+const ReportModal = ({ isOpen, onClose, contentType, contentId, contentTitle, onSubmit }) => {
+  const [reason, setReason] = useState('');
+  const [description, setDescription] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const reportReasons = [
+    'Inappropriate Content',
+    'Spam',
+    'Offensive Language',
+    'Harassment',
+    'False Information',
+    'Other'
+  ];
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!reason) {
+      alert('Please select a reason for reporting');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await onSubmit({
+        content_type: contentType,
+        content_id: contentId,
+        reason: reason,
+        description: description
+      });
+      
+      setReason('');
+      setDescription('');
+      onClose();
+      alert('Report submitted successfully. Thank you for helping keep our community safe.');
+    } catch (error) {
+      console.error('Failed to submit report:', error);
+      alert('Failed to submit report. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-md w-full max-h-96 overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">Report Content</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 text-2xl"
+            >
+              ×
+            </button>
+          </div>
+
+          <p className="text-sm text-gray-600 mb-4">
+            Reporting: <span className="font-medium">{contentTitle}</span>
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Reason for reporting *
+              </label>
+              <select
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select a reason</option>
+                {reportReasons.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Additional details (optional)
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows="3"
+                placeholder="Provide more information about why you're reporting this content..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400"
+              >
+                {submitting ? 'Submitting...' : 'Submit Report'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Main App Content
 function MainApp() {
   const { user, logout, loading } = useAuth();
@@ -1548,11 +1847,23 @@ function MainApp() {
   const [selectedBathroom, setSelectedBathroom] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [mapCenter, setMapCenter] = useState({ lat: 37.7749, lng: -122.4194 });
+  
+  // Report Content System state
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportContent, setReportContent] = useState(null);
+  
+  // Blocked users list (stored in localStorage)
+  const [blockedUsers, setBlockedUsers] = useState(() => {
+    const stored = localStorage.getItem('blockedUsers');
+    return stored ? JSON.parse(stored) : [];
+  });
 
   const fetchBathrooms = async () => {
     try {
       const response = await axios.get(`${API}/bathrooms`);
-      setBathrooms(response.data);
+      // Filter out reviews from blocked users
+      const filtered = response.data.filter(b => !blockedUsers.includes(b.user_id));
+      setBathrooms(filtered);
     } catch (error) {
       console.error('Failed to fetch bathrooms:', error);
     } finally {
@@ -1562,7 +1873,50 @@ function MainApp() {
 
   useEffect(() => {
     fetchBathrooms();
-  }, []);
+  }, [blockedUsers]);
+  
+  // Handle Report Submission
+  const handleReportSubmit = async (reportData) => {
+    try {
+      await axios.post(`${API}/reports`, reportData);
+    } catch (error) {
+      console.error('Failed to submit report:', error);
+      throw error;
+    }
+  };
+  
+  // Handle Block User
+  const handleBlockUser = (userId, userName) => {
+    if (!userId) {
+      alert('Cannot block this user');
+      return;
+    }
+    
+    if (confirm(`Are you sure you want to block ${userName}? You will no longer see their reviews.`)) {
+      const updated = [...blockedUsers, userId];
+      setBlockedUsers(updated);
+      localStorage.setItem('blockedUsers', JSON.stringify(updated));
+      
+      // Close modal if open
+      if (showModal) {
+        setShowModal(false);
+        setSelectedBathroom(null);
+      }
+      
+      alert(`${userName} has been blocked.`);
+      
+      // Refresh bathrooms to apply filter
+      fetchBathrooms();
+    }
+  };
+  
+  // Basic Profanity Filter
+  const profanityList = ['badword1', 'badword2', 'offensive']; // Add actual words as needed
+  const checkProfanity = (text) => {
+    if (!text) return false;
+    const lowerText = text.toLowerCase();
+    return profanityList.some(word => lowerText.includes(word));
+  };
 
   const handleUploadSuccess = (newBathroom) => {
     setBathrooms([newBathroom, ...bathrooms]);
@@ -1699,6 +2053,10 @@ function MainApp() {
                     key={bathroom.id} 
                     bathroom={bathroom} 
                     onClick={handleGalleryItemClick}
+                    onReport={(bathroom) => {
+                      setReportContent(bathroom);
+                      setReportModalOpen(true);
+                    }}
                   />
                 ))}
               </div>
@@ -1751,6 +2109,34 @@ function MainApp() {
         bathroom={selectedBathroom}
         isOpen={showModal}
         onClose={() => setShowModal(false)}
+        currentUserId={user?.id}
+        onReportContent={(bathroom) => {
+          setReportContent(bathroom);
+          setReportModalOpen(true);
+        }}
+        onReportUser={(bathroom) => {
+          setReportContent({
+            ...bathroom,
+            reportType: 'user'
+          });
+          setReportModalOpen(true);
+        }}
+        onBlockUser={handleBlockUser}
+      />
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={reportModalOpen}
+        onClose={() => {
+          setReportModalOpen(false);
+          setReportContent(null);
+        }}
+        contentType={reportContent?.reportType === 'user' ? 'user' : 'review'}
+        contentId={reportContent?.reportType === 'user' ? reportContent?.user_id : reportContent?.id}
+        contentTitle={reportContent?.reportType === 'user' 
+          ? `User: ${reportContent?.user_name}` 
+          : reportContent?.location}
+        onSubmit={handleReportSubmit}
       />
     </div>
   );
