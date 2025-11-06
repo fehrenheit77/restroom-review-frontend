@@ -1,6 +1,3 @@
-
-Action: file_editor view /app/frontend/src/App.js
-Observation: /app/frontend/src/App.js:
 1|import { useState, useEffect, useCallback, createContext, useContext, useRef } from "react";
 2|import "./App.css";
 3|import axios from "axios";
