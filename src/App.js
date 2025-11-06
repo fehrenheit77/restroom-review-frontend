@@ -82,15 +82,37 @@ const Login = () => {
   const { login } = useAuth();
   const [authMethod, setAuthMethod] = useState('email');
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    full_name: '',
-    confirmPassword: ''
-  });
+  email: '',
+  password: '',
+  full_name: '',
+  confirmPassword: '',
+  accept_terms: false
+});
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showTerms, setShowTerms] = useState(false);
+  const [termsText, setTermsText] = useState('');
+  const fetchTerms = async () => {
+  try {
+    const response = await axios.get(`${API}/terms`);
+    setTermsText(response.data.terms_text);
+    setShowTerms(true);
+  } catch (error) {
+    console.error('Failed to fetch terms:', error);
+    setError('Failed to load Terms of Service');
+  }
+};
 
+const handleTermsAccept = () => {
+  setFormData(prev => ({ ...prev, accept_terms: true }));
+  setShowTerms(false);
+};
+
+const handleTermsDecline = () => {
+  setFormData(prev => ({ ...prev, accept_terms: false }));
+  setShowTerms(false);
+};
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -106,10 +128,14 @@ const Login = () => {
 
     try {
       const endpoint = isRegister ? '/auth/register' : '/auth/login';
-      const payload = isRegister 
-        ? { email: formData.email, password: formData.password, full_name: formData.full_name }
-        : { email: formData.email, password: formData.password };
-
+     const payload = isRegister 
+  ? { 
+      email: formData.email, 
+      password: formData.password, 
+      full_name: formData.full_name,
+      accept_terms: formData.accept_terms
+    }
+  : { email: formData.email, password: formData.password };
       if (isRegister && formData.password !== formData.confirmPassword) {
         setError('Passwords do not match');
         setLoading(false);
@@ -242,7 +268,33 @@ const Login = () => {
                   />
                 </div>
               )}
-
+  {isRegister && (
+  <div className="space-y-3">
+    <div className="flex items-start space-x-2">
+      <input
+        type="checkbox"
+        id="accept_terms"
+        checked={formData.accept_terms}
+        onChange={(e) => setFormData(prev => ({ ...prev, accept_terms: e.target.checked }))}
+        required
+        className="mt-1"
+      />
+      <label htmlFor="accept_terms" className="text-sm text-gray-700">
+        I agree to the{' '}
+        <button
+          type="button"
+          onClick={fetchTerms}
+          className="text-blue-600 hover:text-blue-800 underline"
+        >
+          Terms of Service
+        </button>
+      </label>
+    </div>
+    {!formData.accept_terms && isRegister && (
+      <p className="text-xs text-red-600">You must accept the Terms of Service to create an account</p>
+    )}
+  </div>
+)}
               <button
                 type="submit"
                 disabled={loading}
@@ -273,13 +325,54 @@ const Login = () => {
               onClick={() => {
                 setIsRegister(!isRegister);
                 setError('');
-                setFormData({ email: '', password: '', full_name: '', confirmPassword: '' });
+                setFormData({ email: '', password: '', full_name: '', confirmPassword: '', accept_terms: false });
               }}
               className="text-blue-600 hover:text-blue-500 text-sm"
             >
               {isRegister 
                 ? 'Already have an account? Sign in' 
                 : "Don't have an account? Sign up"}
+            </button>
+          </div>
+        </div>
+
+        <TermsModal
+          isOpen={showTerms}
+          onAccept={handleTermsAccept}
+          onDecline={handleTermsDecline}
+          termsText={termsText}
+        />
+      </div>
+    </div>
+  );
+};
+
+// Terms of Service Modal
+const TermsModal = ({ isOpen, onAccept, onDecline, termsText }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-hidden">
+        <div className="p-6">
+          <h2 className="text-xl font-bold mb-4">Terms of Service</h2>
+          
+          <div className="max-h-64 overflow-y-auto mb-6 p-4 bg-gray-50 rounded border text-sm">
+            <pre className="whitespace-pre-wrap font-sans">{termsText}</pre>
+          </div>
+          
+          <div className="flex space-x-4">
+            <button
+              onClick={onDecline}
+              className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400"
+            >
+              Decline
+            </button>
+            <button
+              onClick={onAccept}
+              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+            >
+              Accept Terms
             </button>
           </div>
         </div>
