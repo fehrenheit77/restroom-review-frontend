@@ -91,7 +91,7 @@ const TermsModal = ({ isOpen, onClose, onAccept }) => {
             <section>
               <h3 className="font-bold text-lg mb-2">Zero-Tolerance Policy</h3>
               <p>
-                Loo Review maintains a <strong>zero-tolerance policy</strong> for objectionable content. 
+                Restroom Review maintains a <strong>zero-tolerance policy</strong> for objectionable content. 
                 We do not allow content that is offensive, inappropriate, harmful, or violates our community standards.
               </p>
             </section>
@@ -297,7 +297,7 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            🚽 Welcome to Loo Review
+            🚽 Welcome to Restroom Review
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             {isRegister ? 'Create your account' : 'Sign in to your account'}
@@ -489,21 +489,21 @@ const CategoryRating = ({ category, rating, onRatingChange, icon }) => {
 
 // Overall Rating Display Component
 const OverallRating = ({ 
-  sinkRating, 
-  floorRating, 
-  toiletRating, 
+  vibeRating, 
+  cleanlinessRating, 
+  privacyRating, 
   smellRating, 
-  nicenessRating, 
+  accessoriesRating, 
   overallRating,
   showBreakdown = false,
   readonly = true 
 }) => {
   const categories = [
-    { name: 'sink', rating: sinkRating, icon: '🚰' },
-    { name: 'floor', rating: floorRating, icon: '🧽' },
-    { name: 'toilet', rating: toiletRating, icon: '🚽' },
+    { name: 'vibe', rating: vibeRating, icon: '💫' },
+    { name: 'cleanliness', rating: cleanlinessRating, icon: '🧼' },
+    { name: 'privacy', rating: privacyRating, icon: '🧴' },
     { name: 'smell', rating: smellRating, icon: '👃' },
-    { name: 'niceness', rating: nicenessRating, icon: '✨' }
+    { name: 'accessories', rating: accessoriesRating, icon: '🧴' }
   ];
 
   if (!showBreakdown) {
@@ -1174,11 +1174,11 @@ const UploadForm = ({ onSuccess }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     image: null,
-    sinkRating: 0,
-    floorRating: 0,
-    toiletRating: 0,
+    vibeRating: 0,
+    cleanlinessRating: 0,
+    privacyRating: 0,
     smellRating: 0,
-    nicenessRating: 0,
+    accessoriesRating: 0,
     location: '',
     coordinates: null,
     comments: ''
@@ -1246,11 +1246,11 @@ const UploadForm = ({ onSuccess }) => {
       locationTrimmed: formData.location?.trim(),
       coordinates: formData.coordinates,
       ratings: {
-        sink: formData.sinkRating,
-        floor: formData.floorRating,
-        toilet: formData.toiletRating,
+        vibe: formData.vibeRating,
+        cleanliness: formData.cleanlinessRating,
+        privacy: formData.privacyRating,
         smell: formData.smellRating,
-        niceness: formData.nicenessRating
+        accessories: formData.accessoriesRating
       },
       comments: formData.comments
     });
@@ -1258,16 +1258,16 @@ const UploadForm = ({ onSuccess }) => {
     // Validation with better error messages
     const missingFields = [];
     if (!formData.image) missingFields.push('Image');
-    if (formData.sinkRating === 0) missingFields.push('Sink rating');
-    if (formData.floorRating === 0) missingFields.push('Floor rating');
-    if (formData.toiletRating === 0) missingFields.push('Toilet rating');
+    if (formData.vibeRating === 0) missingFields.push('Vibe rating');
+    if (formData.cleanlinessRating === 0) missingFields.push('Cleanliness rating');
+    if (formData.privacyRating === 0) missingFields.push('Privacy rating');
     if (formData.smellRating === 0) missingFields.push('Smell rating');
-    if (formData.nicenessRating === 0) missingFields.push('Niceness rating');
+    if (formData.accessoriesRating === 0) missingFields.push('Accessories rating');
     if (!formData.location?.trim()) missingFields.push('Location');
     
     if (missingFields.length > 0) {
       console.log('Missing fields:', missingFields);
-      alert(`Please fill in all required fields:\n\n${missingFields.map(field => `• ${field}`).join('\n')}\n\nCurrent form state:\n• Image: ${formData.image ? '✓ Selected' : '✗ Missing'}\n• Ratings: ${[formData.sinkRating, formData.floorRating, formData.toiletRating, formData.smellRating, formData.nicenessRating].filter(r => r > 0).length}/5 completed\n• Location: ${formData.location ? '✓ Filled' : '✗ Empty'}`);
+      alert(`Please fill in all required fields:\n\n${missingFields.map(field => `• ${field}`).join('\n')}\n\nCurrent form state:\n• Image: ${formData.image ? '✓ Selected' : '✗ Missing'}\n• Ratings: ${[formData.vibeRating, formData.cleanlinessRating, formData.privacyRating, formData.smellRating, formData.accessoriesRating].filter(r => r > 0).length}/5 completed\n• Location: ${formData.location ? '✓ Filled' : '✗ Empty'}`);
       return;
     }
 
@@ -1293,11 +1293,11 @@ const UploadForm = ({ onSuccess }) => {
     try {
       const submitData = new FormData();
       submitData.append('image', formData.image);
-      submitData.append('sink_rating', formData.sinkRating);
-      submitData.append('floor_rating', formData.floorRating);
-      submitData.append('toilet_rating', formData.toiletRating);
+      submitData.append('vibe_rating', formData.vibeRating);
+      submitData.append('cleanliness_rating', formData.cleanlinessRating);
+      submitData.append('privacy_rating', formData.privacyRating);
       submitData.append('smell_rating', formData.smellRating);
-      submitData.append('niceness_rating', formData.nicenessRating);
+      submitData.append('accessories_rating', formData.accessoriesRating);
       submitData.append('location', formData.location);
       submitData.append('comments', formData.comments);
       
@@ -1321,11 +1321,11 @@ const UploadForm = ({ onSuccess }) => {
 
       setFormData({
         image: null,
-        sinkRating: 0,
-        floorRating: 0,
-        toiletRating: 0,
+        vibeRating: 0,
+        cleanlinessRating: 0,
+        privacyRating: 0,
         smellRating: 0,
-        nicenessRating: 0,
+        accessoriesRating: 0,
         location: '',
         coordinates: null,
         comments: ''
@@ -1336,14 +1336,14 @@ const UploadForm = ({ onSuccess }) => {
       e.target.reset();
       
       onSuccess(response.data);
-      alert('Loo review uploaded successfully!');
+      alert('Restroom review uploaded successfully!');
     } catch (error) {
       console.error('Upload failed - Full error details:', error);
       console.error('Error response:', error.response?.data);
       console.error('Error status:', error.response?.status);
       console.error('Error headers:', error.response?.headers);
       
-      let errorMessage = 'Failed to upload loo review. Please try again.';
+      let errorMessage = 'Failed to upload Restroom review. Please try again.';
       if (error.response?.data?.detail) {
         errorMessage += `\n\nError details: ${error.response.data.detail}`;
       } else if (error.response?.data?.message) {
@@ -1361,7 +1361,7 @@ const UploadForm = ({ onSuccess }) => {
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-8">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Rate a Loo</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Rate a Restroom</h2>
         {user && (
           <div className="text-sm text-gray-600">
             Signed in as <span className="font-medium">{user.full_name}</span>
@@ -1417,22 +1417,22 @@ const UploadForm = ({ onSuccess }) => {
         </label>
         <div className="space-y-3">
           <CategoryRating
-            category="sink"
-            rating={formData.sinkRating}
-            onRatingChange={(rating) => setFormData(prev => ({ ...prev, sinkRating: rating }))}
-            icon="🚰"
+            category="vibe"
+            rating={formData.vibeRating}
+            onRatingChange={(rating) => setFormData(prev => ({ ...prev, vibeRating: rating }))}
+            icon="💫"
           />
           <CategoryRating
-            category="floor"
-            rating={formData.floorRating}
-            onRatingChange={(rating) => setFormData(prev => ({ ...prev, floorRating: rating }))}
-            icon="🧽"
+            category="cleanliness"
+            rating={formData.cleanlinessRating}
+            onRatingChange={(rating) => setFormData(prev => ({ ...prev, cleanlinessRating: rating }))}
+            icon="🧼"
           />
           <CategoryRating
-            category="toilet"
-            rating={formData.toiletRating}
-            onRatingChange={(rating) => setFormData(prev => ({ ...prev, toiletRating: rating }))}
-            icon="🚽"
+            category="privacy"
+            rating={formData.privacyRating}
+            onRatingChange={(rating) => setFormData(prev => ({ ...prev, privacyRating: rating }))}
+            icon="🧴"
           />
           <CategoryRating
             category="smell"
@@ -1441,25 +1441,25 @@ const UploadForm = ({ onSuccess }) => {
             icon="👃"
           />
           <CategoryRating
-            category="niceness"
-            rating={formData.nicenessRating}
-            onRatingChange={(rating) => setFormData(prev => ({ ...prev, nicenessRating: rating }))}
-            icon="✨"
+            category="accessories"
+            rating={formData.accessoriesRating}
+            onRatingChange={(rating) => setFormData(prev => ({ ...prev, accessoriesRating: rating }))}
+            icon="🧴"
           />
         </div>
         
         {/* Overall Rating Preview */}
-        {(formData.sinkRating > 0 || formData.floorRating > 0 || formData.toiletRating > 0 || 
-          formData.smellRating > 0 || formData.nicenessRating > 0) && (
+        {(formData.vibeRating > 0 || formData.cleanlinessRating > 0 || formData.privacyRating > 0 || 
+          formData.smellRating > 0 || formData.accessoriesRating > 0) && (
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
             <OverallRating
-              sinkRating={formData.sinkRating}
-              floorRating={formData.floorRating}
-              toiletRating={formData.toiletRating}
+              vibeRating={formData.vibeRating}
+              cleanlinessRating={formData.cleanlinessRating}
+              privacyRating={formData.privacyRating}
               smellRating={formData.smellRating}
-              nicenessRating={formData.nicenessRating}
-              overallRating={(formData.sinkRating + formData.floorRating + formData.toiletRating + 
-                formData.smellRating + formData.nicenessRating) / 5}
+              accessoriesRating={formData.accessoriesRating}
+              overallRating={(formData.vibeRating + formData.cleanlinessRating + formData.privacyRating + 
+                formData.smellRating + formData.accessoriesRating) / 5}
               showBreakdown={true}
             />
           </div>
@@ -1541,7 +1541,7 @@ const UploadForm = ({ onSuccess }) => {
         <textarea
           value={formData.comments}
           onChange={(e) => setFormData(prev => ({ ...prev, comments: e.target.value }))}
-          placeholder="Share your thoughts about this loo..."
+          placeholder="Share your thoughts about this Restroom..."
           rows="3"
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
@@ -1601,7 +1601,7 @@ const BathroomCard = ({ bathroom, onClick, onReport }) => {
 
       <img
         src={`${BACKEND_URL}${bathroom.image_url}`}
-        alt="Loo"
+        alt="Restroom"
         className="w-full h-48 object-cover"
         onError={(e) => {
           e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD4KICA8L3N2Zz4K';
@@ -1614,11 +1614,11 @@ const BathroomCard = ({ bathroom, onClick, onReport }) => {
           </h3>
           <div className="ml-2">
             <OverallRating
-              sinkRating={bathroom.sink_rating}
-              floorRating={bathroom.floor_rating}
-              toiletRating={bathroom.toilet_rating}
+              vibeRating={bathroom.vibe_rating}
+              cleanlinessRating={bathroom.cleanliness_rating}
+              privacyRating={bathroom.privacy_rating}
               smellRating={bathroom.smell_rating}
-              nicenessRating={bathroom.niceness_rating}
+              accessoriesRating={bathroom.accessories_rating}
               overallRating={bathroom.overall_rating}
               showBreakdown={false}
               readonly={true}
@@ -1677,7 +1677,7 @@ const BathroomModal = ({ bathroom, isOpen, onClose, onReportContent, onReportUse
           <div className="mb-4">
             <img
               src={`${BACKEND_URL}${bathroom.image_url}`}
-              alt="Loo"
+              alt="Restroom"
               className="w-full h-48 object-cover rounded-lg"
             />
           </div>
@@ -1685,11 +1685,11 @@ const BathroomModal = ({ bathroom, isOpen, onClose, onReportContent, onReportUse
           <div className="space-y-3">
             <div>
               <OverallRating
-                sinkRating={bathroom.sink_rating}
-                floorRating={bathroom.floor_rating}
-                toiletRating={bathroom.toilet_rating}
+                vibeRating={bathroom.vibe_rating}
+                cleanlinessRating={bathroom.cleanliness_rating}
+                privacyRating={bathroom.privacy_rating}
                 smellRating={bathroom.smell_rating}
-                nicenessRating={bathroom.niceness_rating}
+                accessoriesRating={bathroom.accessories_rating}
                 overallRating={bathroom.overall_rating}
                 showBreakdown={true}
                 readonly={true}
@@ -2028,7 +2028,7 @@ function MainApp() {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <h1 className="text-3xl font-bold text-gray-900">🚽 Loo Review</h1>
+            <h1 className="text-3xl font-bold text-gray-900">🚽 Restroom Review</h1>
             <div className="flex items-center space-x-4">
               <nav className="flex space-x-4">
                 <button
@@ -2039,7 +2039,7 @@ function MainApp() {
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Rate Loo
+                  Rate Restroom
                 </button>
                 <button
                   onClick={() => setView('gallery')}
@@ -2088,7 +2088,7 @@ function MainApp() {
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">
-                Recent Loo Reviews
+                Recent Restroom Reviews
               </h2>
               <p className="text-gray-600">
                 {bathrooms.length} {bathrooms.length === 1 ? 'review' : 'reviews'}
@@ -2098,16 +2098,16 @@ function MainApp() {
             {dataLoading ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-2 text-gray-600">Loading loo reviews...</p>
+                <p className="mt-2 text-gray-600">Loading Restroom reviews...</p>
               </div>
             ) : bathrooms.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-lg shadow">
-                <p className="text-gray-500 text-lg mb-4">No loo reviews yet!</p>
+                <p className="text-gray-500 text-lg mb-4">No Restroom reviews yet!</p>
                 <button
                   onClick={() => setView('upload')}
                   className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
                 >
-                  Rate Your First Loo
+                  Rate Your First Restroom
                 </button>
               </div>
             ) : (
@@ -2132,7 +2132,7 @@ function MainApp() {
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">
-                Loo Locations Map
+                Restroom Locations Map
               </h2>
               <p className="text-gray-600">
                 {bathroomsWithCoordinates.length} mapped locations
@@ -2141,13 +2141,13 @@ function MainApp() {
 
             {bathroomsWithCoordinates.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-lg shadow">
-                <p className="text-gray-500 text-lg mb-4">No mapped loo locations yet!</p>
-                <p className="text-gray-400 mb-4">Add location coordinates when rating loos to see them on the map.</p>
+                <p className="text-gray-500 text-lg mb-4">No mapped Restroom locations yet!</p>
+                <p className="text-gray-400 mb-4">Add location coordinates when rating Restrooms to see them on the map.</p>
                 <button
                   onClick={() => setView('upload')}
                   className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
                 >
-                  Rate a Loo with Location
+                  Rate a Restroom with Location
                 </button>
               </div>
             ) : (
@@ -2160,7 +2160,7 @@ function MainApp() {
                   />
                 </div>
                 <div className="p-4 bg-gray-50 text-sm text-gray-600">
-                  💡 Click on map markers to view loo details. Markers show the rating number.
+                  💡 Click on map markers to view Restroom details. Markers show the rating number.
                 </div>
               </div>
             )}
