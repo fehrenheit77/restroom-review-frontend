@@ -1011,17 +1011,17 @@ const LocationAutocomplete = ({ onLocationSelect, selectedLocation, value, onCha
 };
 
 // Location Selector Component (Manual Map Selection with My Location)
-const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
+const LocationSelector = ({ onLocationSelect, selectedLocation, onLocationTextChange }) => {
   const [map, setMap] = useState(null);
   const [marker, setMarker] = useState(null);
   const [userLocationMarker, setUserLocationMarker] = useState(null);
 
-  const getCurrentLocation = useCallback(() => {
+const getCurrentLocation = useCallback(() => {
     if (!map) return;
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const location = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
@@ -1059,6 +1059,23 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
           if (onLocationSelect) {
             onLocationSelect(location);
           }
+
+          // Reverse geocode to get address
+          if (onLocationTextChange) {
+            try {
+              const geocoder = new window.google.maps.Geocoder();
+              const response = await geocoder.geocode({ location: location });
+              
+              if (response.results && response.results[0]) {
+                const address = response.results[0].formatted_address;
+                onLocationTextChange(address);
+              }
+            } catch (error) {
+              console.error('Geocoding error:', error);
+              // Fallback to coordinates if geocoding fails
+              onLocationTextChange(`Location: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`);
+            }
+          }
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -1073,7 +1090,7 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
     } else {
       alert('Geolocation is not supported by this browser.');
     }
-  }, [map, userLocationMarker, onLocationSelect]);
+  }, [map, userLocationMarker, onLocationSelect, onLocationTextChange]);
 
   useEffect(() => {
     const initMap = async () => {
@@ -1091,7 +1108,7 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
           zoom: 13,
         });
 
-        mapInstance.addListener('click', (event) => {
+        mapInstance.addListener('click', async (event) => {
           const location = {
             lat: event.latLng.lat(),
             lng: event.latLng.lng()
@@ -1099,6 +1116,23 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
           
           if (onLocationSelect) {
             onLocationSelect(location);
+          }
+
+          // Reverse geocode to get address
+          if (onLocationTextChange) {
+            try {
+              const geocoder = new window.google.maps.Geocoder();
+              const response = await geocoder.geocode({ location: location });
+              
+              if (response.results && response.results[0]) {
+                const address = response.results[0].formatted_address;
+                onLocationTextChange(address);
+              }
+            } catch (error) {
+              console.error('Geocoding error:', error);
+              // Fallback to coordinates if geocoding fails
+              onLocationTextChange(`Location: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`);
+            }
           }
 
           // Remove previous marker
@@ -1125,7 +1159,7 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
           
           setMarker(newMarker);
         });
-
+        
         setMap(mapInstance);
       } catch (error) {
         console.error('Error loading Google Maps:', error);
@@ -1133,7 +1167,7 @@ const LocationSelector = ({ onLocationSelect, selectedLocation }) => {
     };
 
     initMap();
-  }, [onLocationSelect, selectedLocation]);
+  }, [onLocationSelect, selectedLocation, onLocationTextChange]);
 
   // Update map center when selectedLocation changes
   useEffect(() => {
@@ -1520,9 +1554,10 @@ const UploadForm = ({ onSuccess }) => {
         <p className="text-xs text-gray-500 mb-2">
           Use this if you want to manually click on the map to select coordinates
         </p>
-        {showLocationSelector && (
+              {showLocationSelector && (
           <LocationSelector 
             onLocationSelect={(coordinates) => setFormData(prev => ({ ...prev, coordinates }))}
+            onLocationTextChange={(location) => setFormData(prev => ({ ...prev, location }))}
             selectedLocation={formData.coordinates}
           />
         )}
