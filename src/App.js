@@ -1951,6 +1951,11 @@ function MainApp() {
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportContent, setReportContent] = useState(null);
   
+  // Delete Account state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  
   // Blocked users list (stored in localStorage)
   const [blockedUsers, setBlockedUsers] = useState(() => {
     const stored = localStorage.getItem('blockedUsers');
@@ -1984,7 +1989,7 @@ function MainApp() {
     }
   };
   
-  // Handle Block User
+   // Handle Block User
   const handleBlockUser = (userId, userName) => {
     if (!userId) {
       alert('Cannot block this user');
@@ -2006,6 +2011,28 @@ function MainApp() {
       
       // Refresh bathrooms to apply filter
       fetchBathrooms();
+    }
+  };
+  
+  // Handle Delete Account
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') {
+      alert('Please type DELETE to confirm account deletion');
+      return;
+    }
+    
+    setDeleting(true);
+    try {
+      await axios.delete(`${API}/auth/delete-account`);
+      alert('Your account has been deleted. Your reviews will remain visible but anonymized.');
+      logout();
+    } catch (error) {
+      console.error('Failed to delete account:', error);
+      alert('Failed to delete account. Please try again.');
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+      setDeleteConfirmText('');
     }
   };
   
@@ -2097,8 +2124,15 @@ function MainApp() {
                   Map View ({bathroomsWithCoordinates.length})
                 </button>
               </nav>
-              <div className="flex items-center space-x-3">
+               <div className="flex items-center space-x-3">
                 <span className="text-sm text-gray-600">Hello, {user.full_name}</span>
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className="text-sm text-red-600 hover:text-red-700"
+                  title="Delete Account"
+                >
+                  Delete Account
+                </button>
                 <button
                   onClick={logout}
                   className="text-sm text-gray-600 hover:text-gray-900"
@@ -2223,7 +2257,7 @@ function MainApp() {
         onBlockUser={handleBlockUser}
       />
 
-      {/* Report Modal */}
+     {/* Report Modal */}
       <ReportModal
         isOpen={reportModalOpen}
         onClose={() => {
@@ -2237,6 +2271,66 @@ function MainApp() {
           : reportContent?.location}
         onSubmit={handleReportSubmit}
       />
+      
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h2 className="text-xl font-bold text-red-600 mb-4">⚠️ Delete Account</h2>
+            
+            <div className="space-y-4">
+              <p className="text-gray-700">
+                Are you sure you want to delete your account? This action cannot be undone.
+              </p>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                <p className="text-sm text-yellow-800">
+                  <strong>What will happen:</strong>
+                </p>
+                <ul className="text-sm text-yellow-800 list-disc ml-5 mt-2">
+                  <li>Your account and personal data will be permanently deleted</li>
+                  <li>Your reviews will remain visible but shown as "Deleted User"</li>
+                  <li>You will be immediately logged out</li>
+                  <li>This action cannot be reversed</li>
+                </ul>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Type <span className="font-bold text-red-600">DELETE</span> to confirm:
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                  placeholder="Type DELETE"
+                />
+              </div>
+              
+              <div className="flex space-x-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeleteConfirmText('');
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleting || deleteConfirmText !== 'DELETE'}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  {deleting ? 'Deleting...' : 'Delete Account'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
